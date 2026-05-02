@@ -1,0 +1,28 @@
+# Harvest & build artifacts
+harvest/
+build/
+tools/_vendor/
+
+# Generated Content Patcher fragments
+ECI.Content/include/
+ECI.Content/content.json
+
+# .NET
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.python-version
+*.egg-info/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+.DS_Store

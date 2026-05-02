@@ -1,0 +1,16 @@
+{
+  "Name": "Expanded Character Interactions — Tokens",
+  "Author": "eavalenzuela",
+  "Version": "0.0.1",
+  "Description": "Registers Content Patcher tokens used by the ECI content pack (time-of-day buckets, NPC location, recent player actions).",
+  "UniqueID": "eavalenzuela.ECI.Tokens",
+  "EntryDll": "ECI.Tokens.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": [],
+  "Dependencies": [
+    {
+      "UniqueID": "Pathoschild.ContentPatcher",
+      "MinimumVersion": "2.0.0"
+    }
+  ]
+}

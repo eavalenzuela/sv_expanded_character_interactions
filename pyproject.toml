@@ -1,0 +1,19 @@
+[project]
+name = "eci-tools"
+version = "0.0.1"
+description = "Authoring tools for Expanded Character Interactions (Stardew Valley mod)"
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml>=6.0",
+    "jinja2>=3.1",
+    "jsonschema>=4.20",
+]
+
+[project.optional-dependencies]
+analyze = [
+    "scikit-learn>=1.3",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
