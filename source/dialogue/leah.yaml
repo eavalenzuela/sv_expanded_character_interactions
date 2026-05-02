@@ -1,0 +1,42 @@
+# Smoke-test dialogue for Leah.
+# Each entry conditionally overrides her weekday dialogue keys; vanilla
+# lines remain in place when our `when` clause doesn't match.
+#
+# Schema:
+#   npc:        string
+#   lines[]:
+#     id:          unique string (used as CP LogName)
+#     target_key:  string | list | "*" (default "*" = all 7 weekdays)
+#     when:        map of CP token name → value (ANDed)
+#     text:        string (Stardew dialogue, may use $h/$e/etc.)
+
+npc: Leah
+
+lines:
+  # 1. Weather + location: rainy day in the Forest.
+  - id: leah_forest_rain_listen
+    when:
+      Weather: Rain
+      LocationName: Forest
+    text: "The rain on the leaves is its own kind of music.$h"
+
+  # 2. Custom token: callback after the player has chopped a tree today.
+  - id: leah_chopped_tree_callback
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "I heard you out there with the axe today. Did the wood split clean?"
+
+  # 3. Time bucket + location: late evening in her cabin.
+  - id: leah_late_evening_studio
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+      LocationName: LeahHouse
+    text: "Mmm... I work better when the world's gone quiet. The shapes come easier."
+
+  # 4. Season + time bucket combo: winter morning at her cabin.
+  - id: leah_winter_morning_warmth
+    when:
+      Season: Winter
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+      LocationName: LeahHouse
+    text: "Mmm — the cabin's warmer than I thought it'd be this morning."
