@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>ECI.Tokens</RootNamespace>
+    <AssemblyName>ECI.Tokens</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Version>0.0.1</Version>
+
+    <!-- Local Stardew install. Override with /p:GamePath=... or the GamePath env var. -->
+    <GamePath Condition="'$(GamePath)' == ''">/games/games/steam/steamapps/common/Stardew Valley</GamePath>
+
+    <!-- Auto-deploy build output to the local install for dev iteration. -->
+    <EnableModDeploy>true</EnableModDeploy>
+    <ModFolderName>ECI.Tokens</ModFolderName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.3.2" />
+  </ItemGroup>
+
+</Project>
