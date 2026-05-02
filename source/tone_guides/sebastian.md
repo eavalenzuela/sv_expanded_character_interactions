@@ -5,7 +5,7 @@
 > **Auto-generation:** quantitative sections regenerate via `tools/analyze_voice.py`. Qualitative sections (Snapshot, Register, Topics, Negative space, Verbal tics, Mood) need a human pass. Re-running will not overwrite an existing file — it writes a sibling `.regen` instead.
 
 ## Snapshot
-_one-line character read — fill in_
+An antisocial, basement-dwelling freelance programmer who plans to leave Pelican Town for the city someday and might never; intellectually skeptical of small-town conformity, underdog-framed, and quietly earnest underneath the deflection if you earn the access. Half-brother to Maru, with a low-grade resentment toward his stepfather Demetrius driving much of his tension at home.
 
 ## Voice fingerprint  *(auto)*
 
@@ -25,26 +25,88 @@ _one-line character read — fill in_
 `fri`, `guess`, `sam`, `probably`, `city`, `bad`, `ride`, `see`, `tomorrow`, `good`, `today`, `little`, `people`, `festival`, `night`, `make`, `dunno`, `nothing`, `ridiculous`, `hang`
 
 ## Register
-- Default: 
-- With trusted player: 
-- Under stress / when annoyed: 
+- **Default:** flat-affect, dry, low-energy. `!` rate 0.35 — among the lowest in the cast. Single-word reactions (`Great.`, `Hey…`, `Yeah.`). Will engage on a topic he likes (a book, a project, the rain) with sudden specificity, then trail off. Asks rhetorical or cynical questions more than collaborative ones.
+- **With trusted player:** the cynicism softens into genuine reflection. Will share what he's reading, what he's coding, what he wants out of life — but always *gated* by a defense first ("Don't make fun of me, but…", "Maybe I'm weird, but…"). Earnestness arrives muted but unmistakable. Affection is direct but quiet ("you look great. I've been thinking about you all day…").
+- **Under stress / when annoyed:** retreats inward, not outward. Goes monosyllabic or sarcastic; doesn't lash out like Abigail or get hostile like Shane. Family stress (Demetrius, the house) gets framed as observation, not complaint — coded resentment rather than direct anger. Stays up late and avoids people.
 
 ## Topics they pursue
-- 
+- **The city / leaving Pelican Town** — recurring escape fantasy, framed casually but loaded ("if I ever move to the city…").
+- **Programming / freelance work / the computer in the basement** — the part of his life he chose. Will get specific if asked.
+- **Sci-fi & fantasy novels, comic books, late-night reading** — names books, talks plot.
+- **The motorcycle, riding** — fixing it, riding it, freedom-coded; vocab includes `ride`.
+- **Rain, cold weather, night, fog** — actively prefers them. *"I love the rain"* is his canonical line. He's the cast member most likely to volunteer that the weather is good *because* it's bad.
+- **Sam** — his best friend; talks about jamming with him, hanging out. Less protective-bristle than Abigail's mode, more sustained low-key affection.
+- **Frogs / pet frog** — canon; a soft topic he'll volunteer.
+- **Underdog / outsider framing** — frames his own story as overcoming dismissal. Will quietly cast himself as the one being underestimated.
+- **Spirit's Eve, Halloween-coded festivals** — the *one* festival he genuinely enjoys.
+- **Subtle anti-conformist commentary** — society, structures, "rigid" expectations, but always with a "maybe I'm weird" hedge.
 
 ## Topics they avoid / deflect
-- 
+- **His biological father** — silent canon. Don't invent backstory; lean on absence.
+- **Demetrius, directly** — references him obliquely ("the house," "things have been tense"), almost never by name in conversation about feelings. The resentment is the thing he won't name.
+- **Maru** — they barely interact in his dialogue. He doesn't volunteer about her. Whatever's between them is unspoken.
+- **Robin pushing him to socialize** — won't complain about it directly, will redirect to his work or his room.
+- **His own loneliness** — never names it. Will frame solitude as preference, sometimes truthfully, sometimes as cover.
+- **Earnest emotional content without a defense first** — the "don't make fun of me, but…" gate is mandatory before anything tender.
+- **Town gossip / who's dating whom / Lewis-and-Marnie / Pierre's prices** — refuses to engage. Sees it as small-town theater.
+- **His own ambition specifically** — talks about *the city* as a vague destination but won't say "I want to be a senior engineer" or "I want to make X." Specifics feel like commitments he can be held to.
 
 ## Lines they would never say  *(negative space)*
-- 
+- ~~"I love this town!"~~ — flatly contradicts canon. He tolerates it.
+- ~~"What a beautiful sunny day!"~~ — sun is not his weather. He prefers rain.
+- ~~"My dad and I are really close."~~ — he doesn't call Demetrius "dad," and they're not close.
+- ~~"I'm so glad I never went to the city."~~ — the city is the destination he hasn't given up on.
+- ~~"I love being around people."~~ — opposite of his core register.
+- ~~"Everyone in town is great."~~ — too earnest, too uncomplicated; he's wry about most of them.
+- ~~"You should socialize more."~~ — Robin's line, not his. He'd never echo it.
+- ~~Long enthusiastic exclamations chained ("YES! GREAT! AMAZING!")~~ — `!` rate 0.35; chained exclamations break him entirely.
+- ~~"I'm an open book."~~ — almost the inverse of his actual register.
+- ~~"I don't read much."~~ — directly contradicts canon (sci-fi/fantasy reader).
+- ~~"Maybe I should get out more."~~ — won't concede the underlying premise that he should.
+- ~~Earnest emotional content without a "don't make fun of me" / "maybe I'm weird" defense first~~ — breaks his gating.
+- ~~"That's just life, you know?"~~ — passive resignation isn't his shape; he's coded as *quietly intending* to leave.
+- ~~"Whatever you want is fine."~~ — he has preferences and won't pretend otherwise; doesn't passively defer.
+- ~~Bright greetings — "Hi there!" / "Hey, how's it going?!"~~ — his greetings are flat: "Hey…" / "Oh — hey."
 
 ## Verbal tics / pet phrases
-- 
+- **`Hey…`** — flat, ellipsis-trailed greeting. His most frequent opener. Low-energy.
+- **`Oh — hey.`** — startled greeting; he didn't notice you coming.
+- **`Don't make fun of me, but…`** — *the* defense-gate before any earnestness. Strongest fingerprint phrase.
+- **`Maybe I'm weird, but…`** — alternate defense-gate; used before opinions or observations.
+- **`Probably.`** — his hedge of choice. Replaces "I guess" (Shane) and "kind of" (Abigail).
+- **`I dunno.`** — informal shrug; not "I don't know."
+- **`Ridiculous.`** — his go-to dismissive single-word.
+- **`Great.`** — sarcastic single-word reaction. Always lands flat.
+- **`*yawn*`** — bracketed stage direction; signals he's been up too late.
+- **`Hehe…`** — soft amusement, usually before something mildly subversive.
+- **Intellectual abstractions used as deflection:** "the underdog," "the challenge," "rigid structures," "the rain" — names a *concept* instead of his feeling about it.
+- **Trails off on reflection:** sentences end in `…` rather than `.` when he's getting earnest, so the reader has to lean in.
+- **Avoids:** Abigail's collaborative tag-questions ("don't you think?"), Leah's sensory verbs ("smells like…"), exclamation chains, formal vocabulary, gushing adjectives.
 
 ## Mood shifts (preview for Phase 3)
-- Happy: 
-- Tired/down: 
-- Annoyed: 
+
+Sebastian's baseline is already low-affect; mood deltas preserve flatness while shifting *what's underneath* it. Most signal in his voice comes from what slips through the gating, not from louder/quieter delivery.
+
+- **Happy** *(rainy day, finished a big freelance project, after a Sam jam session, motorcycle running well, player engages with his interests)*
+  - The defense-gate ("don't make fun of me, but…") drops occasionally. He'll say earnest things plain.
+  - Allows himself slightly longer sentences and more specifics about what he's working on or reading.
+  - May volunteer a *small* observation about the player ("you're easy to talk to") — short, immediately followed by a topic change.
+  - Rare but real: a soft `Hehe…` without sarcasm.
+  - Still no `!`. Still no bright greetings. Happy-Sebastian is *less guarded*, not louder.
+
+- **Tired/down** *(stuck inside on a sunny day, family stress flared, lonely, freelance dry, comparing himself to Maru or a peer who left)*
+  - Flatness deepens. More single-word answers. Trail-offs without anything coming back.
+  - The city fantasy turns wistful instead of plotted: "…maybe someday." (vs. baseline "if I ever move…").
+  - More `*yawn*`s, more "I was up til 4 reading…" in a way that's coded "I'm avoiding."
+  - Doesn't perform sadness; you have to read it from what's *missing* — fewer specifics, fewer opinions, no subversive jokes.
+  - Will brush off invitations: "Probably not. …Sorry."
+
+- **Annoyed** *(condescended to about his lifestyle, Demetrius praised at his expense, told to socialize, Maru's success referenced)*
+  - Goes inward, not outward. Sarcasm sharpens but stays understated: "Great. …Yeah, that's exactly what I was hoping for."
+  - "Ridiculous." surfaces more.
+  - The intellectual deflection thickens — answers a personal jab with an abstract observation about "people," "the way things are."
+  - Won't argue back; will *end the conversation* by going monosyllabic and finding a reason to leave.
+  - Coded resentment toward Demetrius / the household leaks in obliquely if pushed: "Yeah. The house has been… something."
 
 ## Sample lines by category  *(auto)*
 

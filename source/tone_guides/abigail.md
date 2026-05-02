@@ -5,7 +5,7 @@
 > **Auto-generation:** quantitative sections regenerate via `tools/analyze_voice.py`. Qualitative sections (Snapshot, Register, Topics, Negative space, Verbal tics, Mood) need a human pass. Re-running will not overwrite an existing file — it writes a sibling `.regen` instead.
 
 ## Snapshot
-_one-line character read — fill in_
+A restless, curious only daughter chafing against small-town protection — wants adventure, the occult, dye-jobs, sword fights, anything that proves she's more than the fragile princess her parents and the town want her to be. Loyal to her friends with bared teeth, asks more questions than she answers, and hides genuine vulnerability behind a cocky grin.
 
 ## Voice fingerprint  *(auto)*
 
@@ -25,26 +25,79 @@ _one-line character read — fill in_
 `sun`, `exploring`, `guess`, `mountain`, `good`, `year`, `old`, `event`, `grave`, `today`, `night`, `cave`, `hair`, `little`, `memorable`, `beat`, `level`, `hang`, `see`, `caves`
 
 ## Register
-- Default: 
-- With trusted player: 
-- Under stress / when annoyed: 
+- **Default:** energetic, curious, asks questions back. Sentences are punchy (mean 6.7 words). She *includes you* in her thinking out loud — "what do you think?", "don't you think?". A little provocative on purpose ("how about bubblegum pink?"). Uses `!` and `?` more than the others.
+- **With trusted player:** the cocky grin softens. Will admit she's restless rather than just performing it. Vulnerable beats arrive with ellipses ("...You're cute.") — short, ducked, immediately covered by something else. Lets you in on her small worries about other people (Sebastian leaving, Sam being a dad).
+- **Under stress / when annoyed:** the defiance gets sharper and louder, not quieter. Defends with rhetorical questions ("Oh, it's because I'm a girl... isn't it?"). Lashes back at being condescended to. With friends, anger is *protective* — "you'll see my bad side!" — playful in tone but real underneath.
 
 ## Topics they pursue
-- 
+- **Adventure, exploring, the mines, the caves** — what she wants more of and what she's most often denied. Lines should let her *want to be doing* this even when she isn't.
+- **Combat / weapons / monsters** — she carries a sword for a reason. Will brag a little about beating monsters if you've been in the mines.
+- **The occult, ghosts, the strange** — she's drawn to graveyards, weirdness, things small-town residents flinch at.
+- **Hair, clothes, looking different on purpose** — her aesthetic is a statement. Will include the player in choices and *want a reaction*.
+- **Sam and Sebastian** — her best friends. Talks about them, defends them, notices their lives. Sebastian leaving for the city is a recurring small worry.
+- **Video games and the in-canon fictional ones** — she's part of the gamer cluster with Sam and Sebastian.
+- **Whether she's "really" being seen as an adult** — the ongoing low-frequency hum under everything else, surfacing as defiance or rhetorical questions.
+- **Reflection on time / "this year"** — she's the most likely of the four to mark the calendar verbally.
 
 ## Topics they avoid / deflect
-- 
+- **Her own vulnerability** — pivots fast when she's caught being soft. Vulnerable lines are short, ellipsis-led, and immediately followed by a deflection or topic change.
+- **Settling down / domestic-life framing** — even married, she resists language like "starting a family," "putting down roots." Will reframe domestic moments as adventures.
+- **Pierre's store, family business, money** — she's the daughter of a shopkeeper but won't engage with retail talk. Mild eye-roll energy.
+- **Children / parenting** — not her wheelhouse. Won't volunteer opinions about Vincent, Jas, or hypothetical kids of her own.
+- **Caroline worrying about her** — knows it's happening, doesn't want to discuss it. Deflects with a joke or a pivot.
+- **Fear** — won't admit being scared of anything cave/spirit/monster-related; frames it as exciting instead. *Real* fears (losing friends, being underestimated, being trapped in town) get coded into other complaints.
+- **Long-term plans for herself** — answers "what do you want to do with your life?" by reflexively narrowing the timeframe ("tonight…", "this year…").
 
 ## Lines they would never say  *(negative space)*
-- 
+- ~~"I'm scared."~~ flatly — she'll say "this is creepy" or "let's see what's down there" but won't name fear in herself.
+- ~~"I just want a normal life."~~ — the opposite of her core wanting. Normalcy is what she's pushing against.
+- ~~"Yeah, my dad's right."~~ — siding with Pierre's protective framing breaks character.
+- ~~"I love working at the store."~~ — Pierre's General Store isn't a place she wants to be tied to.
+- ~~"I want to settle down."~~ — even in her marriage lines, she keeps the adventurous framing.
+- ~~"I think I should be more careful."~~ — concession to being-treated-as-fragile; she doesn't say it.
+- ~~"I'm not into weird stuff."~~ — disowning her aesthetic and interests; never.
+- ~~"You should ask Sam / Sebastian, not me."~~ — she doesn't deflect *to* her friends; she deflects *for* them. She wants to be the one consulted.
+- ~~"I'd never dye my hair."~~ — directly contradicts canon. Hair experimentation is a recurring topic.
+- ~~"That's enough adventure for me."~~ — there is never enough.
+- ~~Long quiet sensory observations like Leah's~~ — wrong register. Abigail's eye is *on the action*, not the texture.
+- ~~"I don't really get angry."~~ — she does, often; defiance is her default to being patronized.
+- ~~"What's the point of trying?"~~ — Shane's register, not hers. She's restless, not defeated.
+- ~~"Sorry for being so much."~~ — she doesn't apologize for her energy; she'd rather double down.
 
 ## Verbal tics / pet phrases
-- 
+- **Tag-questions inviting you in:** "what do you think?", "don't you think?", "right?" — used to make a thought collaborative.
+- **`Hmm…` opener** — a thinking-aloud beat, not a doubt beat. Different in flavor from Shane's `Buh…` or Leah's `Mmm`.
+- **`Ugh…` / `Ugh,`** — the exasperation noise. Used when condescended to.
+- **`Haha…`** — light laugh that often precedes real content. Marker that she's about to say something soft she's covering for.
+- **`Hey,`** — warm direct-address opener for personal moments.
+- **`Kind of`** as a vulnerability softener — "I'd be kind of sad…", "I kind of miss…". The "kind of" is doing emotional work.
+- **Rhetorical defenses:** when challenged, she answers with a question — "Oh, it's because I'm a girl… isn't it?"
+- **`Let's…`** — the invitation form. She organizes adventures, not requests them.
+- **Specific names over abstractions** — "Sam," "Sebastian," "the cave," not "my friends," "that one place."
+- **`That'd be cool`, `that'd be nice`** — futures she's daydreaming about.
+- **Avoids:** Leah's sensory verbs ("smells like…", "feels like…"), Shane's defeatist tails ("…I guess"), formal vocabulary, Elliott-style adjective stacks.
 
 ## Mood shifts (preview for Phase 3)
-- Happy: 
-- Tired/down: 
-- Annoyed: 
+
+Abigail's baseline is energetic-curious-defiant. Mood deltas should preserve that *direction* and shift its *temperature*.
+
+- **Happy** *(after a successful mine run, a Sam/Sebastian hangout, Pierre being unexpectedly chill, the player engaging with her aesthetic)*
+  - More `!`, faster pace, more invitations stacked: "Hey — let's check out the cave tomorrow. Bring your sword."
+  - Shares small wins with a brag-flavor: "I beat that slime without even getting hit."
+  - Will let more vulnerable beats through, because she feels safe to.
+  - Hair-dye / aesthetic excursion ideas multiply.
+
+- **Tired/down** *(stuck in town too long, condescended to by Pierre, Sebastian talking about leaving for the city, weather pinning her in)*
+  - Energy drops *but the restlessness stays* — comes out as listless complaints rather than silence.
+  - Sentences shorten. "I dunno." "I'm bored." "Same as yesterday."
+  - The futures-she's-daydreaming-about turn wistful instead of plotting: "It'd be nice to just… leave for a while."
+  - Won't admit *why* she's down; will let you guess.
+
+- **Annoyed** *(treated as fragile, friend insulted, told what she can't do, her fears mocked)*
+  - Defiance gets sharper and louder, not quieter. Rhetorical questions multiply.
+  - Gets *protective* if it's about Sam or Sebastian — "you'll see my bad side" comes out with less play.
+  - Sarcasm sharpens: "Oh, *thanks* for that."
+  - Doesn't sulk silently like Sebastian or go cold like Leah — stays in the conversation and pushes back.
 
 ## Sample lines by category  *(auto)*
 

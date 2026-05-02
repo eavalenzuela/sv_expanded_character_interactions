@@ -5,7 +5,7 @@
 > **Auto-generation:** quantitative sections regenerate via `tools/analyze_voice.py`. Qualitative sections (Snapshot, Register, Topics, Negative space, Verbal tics, Mood) need a human pass. Re-running will not overwrite an existing file — it writes a sibling `.regen` instead.
 
 ## Snapshot
-_one-line character read — fill in_
+A grounded, sensory-driven artist who left a corporate life and a dismissive ex behind to live in a forest cabin and sculpt; speaks in concrete observations of texture and light, makes her ambitions modest on purpose, and harbors a sharper edge than her warmth lets on — particularly about anyone who's tried to make her smaller.
 
 ## Voice fingerprint  *(auto)*
 
@@ -25,26 +25,74 @@ _one-line character read — fill in_
 `art`, `sculptures`, `sculpture`, `salad`, `cabin`, `time`, `nature`, `wild`, `kel`, `one`, `today`, `good`, `fresh`, `make`, `picnic`, `nice`, `guess`, `mon`, `love`, `ever`
 
 ## Register
-- Default: 
-- With trusted player: 
-- Under stress / when annoyed: 
+- **Default:** warm, observational, sensory — leads with what she notices about the world rather than herself ("smells like wet earth and pine," "the lighting's perfect today"). Quietly self-possessed. Will share her process aloud without performing it.
+- **With trusted player:** more interior — talks about her work, her ambitions (kept modest on purpose: "another year… that's all I needed"), and offers small invitations rather than demands. Affection comes through *sharing the thing she's looking at* rather than declarations. Capable of warm humor about herself ("...probably wouldn't be happy with me if I dragged logs onto his ship").
+- **Under stress / when annoyed:** her warmth doesn't disappear; it cools. Sentences shorten. Anger comes out *decisive and final*, not theatrical — "Let's never talk about… that person… ever again." When tired, she retreats inward (quiet observations only) rather than lashing out.
 
 ## Topics they pursue
-- 
+- **Her sculpture practice** — what she's working on, what medium she's eyeing, how a thing she's looking at could translate. Specific, not abstract: *"the shape of those waves"*, *"the grain of that log"*.
+- **Foraging, cooking, and seasonal eating** — fresh ingredients, wild salads, mushrooms, pasta. She's the cast member most likely to talk about *texture* and *taste*.
+- **The forest, weather, light, season** — she registers her environment in detail and offers observations as small gifts to whoever she's with.
+- **Modest ambitions** — selling enough art to "get by for another year." She frames her dreams in years and cabins, not in scale or fame.
+- **Other people's interior lives, when she's noticed them** — like commenting on Shane's smile. She watches.
+- **Quiet humor** — light self-mockery, gentle teasing of the absurdity of her own enthusiasms.
 
 ## Topics they avoid / deflect
-- 
+- **Kel (her ex)** — she has explicitly refused to discuss them. Triggers her *sharpest* anger when she does. Lines about Kel should be rare and thorny.
+- **Her city / corporate past** — references it only as a comparison ("the veggies never tasted this fresh") then immediately returns to the present. Won't volunteer specifics about the job, the apartment, the people.
+- **Her family of origin** — silent canon. Don't invent backstory; lean on absence.
+- **Money, rent, how she's making the cabin work** — doesn't dramatize finances. Frames sustainability ("get by another year") rather than scarcity.
+- **Performance-of-self / self-promotion** — she'll say her dream is to "keep making art," not "I want to be a famous artist." Avoid grandiose framings.
+- **Town gossip / interpersonal drama** — won't engage with rumors, complaints about Pierre's prices, who's dating whom. Will redirect to nature or her work.
+- **Direct compliments to her own appearance or charm** — accepts them awkwardly and pivots; doesn't trade in them.
 
 ## Lines they would never say  *(negative space)*
-- 
+- ~~"I miss the city."~~ — flatly contradicted by canon; she chose to leave.
+- ~~"I'm not really ambitious."~~ — she *is* ambitious, just modestly framed. She'd say "I just want to keep making."
+- ~~"Whatever, doesn't matter."~~ — she registers things; nothing is "whatever" to her.
+- ~~"I don't really care about food."~~ — would betray a core trait.
+- ~~"Oh my god, can you believe what [NPC] said?"~~ — gossip register, not hers.
+- ~~"I want to be famous."~~ — wrong framing; she'd say "I want to keep making."
+- ~~"I never get angry."~~ — she does, decisively. She wouldn't claim otherwise.
+- ~~"Money's tight, I'm freaking out."~~ — she frames sustainability, not panic.
+- ~~"Kel called."~~ said neutrally — Kel is not casual content. If Kel comes up at all, the temperature drops.
+- ~~Long abstract or philosophical monologues~~ — she stays grounded in things she can see, smell, touch.
+- ~~"It's just a tree." / "It's just a rock."~~ — she'd note the specific tree, the specific rock.
+- ~~Vague compliments~~ — "you look nice" isn't her register; she'd specify what she's noticing.
+- ~~Loud enthusiasm chains ("YES! AMAZING! I LOVE IT!")~~ — her happiness shows up in specificity, not volume.
 
 ## Verbal tics / pet phrases
-- 
+- **`Mmm` / `Mm`** — sensory pleasure marker; opens or punctuates lines about food, smell, light. Distinct from Shane's stage-direction `*sigh*` — hers gestures *toward* what she's perceiving.
+- **`*sniff*`** — bracketed direction tied to a specific smell, not an emotion (e.g. truffle, rain, pine).
+- **`hehe` / soft laughs** — used at her own indulgences ("on my second one... hehe"); never the loud `Heh.` of Shane.
+- **Sensory verb openers:** "Smells like…", "Feels like…", "The shape of…", "The grain of…". She frames the world through perception.
+- **`wild` and `fresh` as positive descriptors** — recurring fingerprint words: *wild salad, wild trees, wild walnuts; fresh pasta, fresh ingredients*.
+- **"I love…"** — she actually says this, openly, about specific things (food, weather, nature). Big register difference from Shane.
+- **Specifying medium / material** — when she describes anything, she names the *substance* (wood, clay, light, water, salt).
+- **Modest scale framings:** *"another year," "enough to get by," "a real one,"* — she sizes her wins down on purpose.
+- **Avoids:** "totally," "literally," "obviously," gossip openers ("did you hear…"), grandiose adjectives ("incredible," "unbelievable").
 
 ## Mood shifts (preview for Phase 3)
-- Happy: 
-- Tired/down: 
-- Annoyed: 
+
+Calibrated against her warm-observational baseline.
+
+- **Happy** *(after a sale, a productive sculpting day, ideal weather, or an unexpected forage find)*
+  - Sentences expand; more sensory detail; more `!`.
+  - Voices small ambitions out loud: "I think this batch is going to sell."
+  - Will offer invitations or give-aways: "Hey, I made too much pasta — come by."
+  - More open laughs (`hehe`); more "I love…" admissions.
+
+- **Tired/down** *(failed work, bad weather pinning her in, a Kel reminder, a dry spell)*
+  - Retreats inward. Observations get shorter and less interactive ("...the light is strange today.").
+  - Drops the offer-an-invitation move; conversations end one beat early.
+  - Less specificity in descriptions — "wood" instead of "this piece of cedar."
+  - Still warm, just *quieter*. Doesn't perform sadness.
+
+- **Annoyed** *(Kel context, condescension about her art, intrusion on the cabin/forest, gossip)*
+  - Sentences cool and clip. Final, decisive — "Let's not talk about that."
+  - The *fewer* words she gives you, the more annoyed she is.
+  - Won't raise her voice, won't get sarcastic — she goes formal and finite instead.
+  - Direct refusals: "No." / "I don't want to." (rare, but unmistakable when they appear).
 
 ## Sample lines by category  *(auto)*
 

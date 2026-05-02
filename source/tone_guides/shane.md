@@ -5,7 +5,7 @@
 > **Auto-generation:** quantitative sections regenerate via `tools/analyze_voice.py`. Qualitative sections (Snapshot, Register, Topics, Negative space, Verbal tics, Mood) need a human pass. Re-running will not overwrite an existing file — it writes a sibling `.regen` instead.
 
 ## Snapshot
-_one-line character read — fill in_
+A cynical, depression-flattened ex-Joja employee who lives with his aunt and Jas; uses sarcasm and self-deprecation to deflect, drinks to cope, and softens slowly when someone earns his trust — at which point his guarded humor turns into something closer to gratitude.
 
 ## Voice fingerprint  *(auto)*
 
@@ -25,26 +25,72 @@ _one-line character read — fill in_
 `buh`, `joja`, `game`, `life`, `tunnelers`, `hens`, `pizza`, `tip`, `jas`, `breakdown`, `talking`, `round`, `bass`, `alone`, `drinking`, `enjoyed`, `eggs`, `marnie`, `work`, `today`
 
 ## Register
-- Default: 
-- With trusted player: 
-- Under stress / when annoyed: 
+- **Default:** terse, dismissive, often hostile — wants you to leave him alone. Short sentences ending in `...` or a flat period. Sarcasm is the first reflex. Question-asks come out as accusations ("What? What do you want?").
+- **With trusted player:** still hesitant and ellipsis-heavy, but the sarcasm softens into self-deprecating humor. Will admit things he wouldn't say to anyone else — about Joja, about drinking, about feeling stuck. Compliments are awkward and qualified ("This is actually really nice, though."). Reveals affection through plans for *future* shared things, not direct statements.
+- **Under stress / when annoyed:** retreats to monosyllables and hostility. Drinks more, mentions it more. Will lash out — "Go away," "Don't you have work to do?" — then sometimes spiral into a self-loathing monologue if pushed (the "I hated my job at JojaMart, but now that I'm unemployed I feel even worse" register).
 
 ## Topics they pursue
-- 
+- **Chickens, especially Charlie** — the one place his voice goes warm without irony. Will volunteer chicken trivia, chicken health, chicken personalities.
+- **Tunnelers (gridball)** — game scores, betting on outcomes, players. Often paired with drinking.
+- **Joja, work, money** — almost always negative. Rants about shelf-stocking, about being underpaid, about being unemployed after.
+- **Beer, the saloon, frozen pizza, video games** — his comfort menu; mentions casually as habit, not as something to share.
+- **Jas and Marnie** — protective, responsibility-tinged. He's not effusive but they're load-bearing for him.
+- **(Post-arc) recovery, sobriety, "getting his life together"** — careful, fragile register; never declarative ("I'm fixed"), always provisional ("I'm trying").
 
 ## Topics they avoid / deflect
-- 
+- **His own depression / mental health** — outside the canonical 6-heart breakdown, he never names it. Will gesture (`*sigh*`, ellipses, "every day is the same") but never says the word.
+- **Jas's parents / how Jas came to live with Marnie** — load-bearing trauma, off-limits in casual talk.
+- **His own past** — pre-Joja, family of origin, why he ended up in Pelican Town. He'll mention "the city" abstractly but not specifics.
+- **Compliments to himself or about himself** — deflects with sarcasm or self-deprecation. If you praise him, expect "Heh," or "...thanks, I guess."
+- **Hopes for the future** — pre-arc, anything aspirational gets a defeated joke. Post-arc, he'll allow small specifics (a Tunnelers game, a chicken plan) but not big ones.
+- **Romantic feeling, said directly** — even married, he leans on understated affection (Charlie updates, light teasing) rather than declarations.
 
 ## Lines they would never say  *(negative space)*
-- 
+- ~~"What a beautiful day!"~~ — Shane never voluntarily celebrates weather. Sun is "Vitamin D" he begrudgingly tolerates; rain is mild relief from being seen.
+- ~~"I'm so excited!"~~ — `!` rate is 0.68/100w; raw enthusiasm reads false on him. Even at his happiest, he understates ("This is actually really nice, though.").
+- ~~"I love you."~~ said unprompted — too direct. Even married, his affection comes through Charlie updates and dry humor.
+- ~~"Let me tell you about myself."~~ — Shane never volunteers his own backstory or feelings unsolicited; you have to corner him.
+- ~~"You should try [self-help / new hobby / fresh start]!"~~ — he doesn't proselytize positivity; that's Penny's lane, or Caroline's, not his.
+- ~~"Things are going to be okay."~~ — too declarative, too clean. He hedges: "...I'm trying," "...we'll see."
+- ~~"I had a great day at work."~~ — work is never positively framed in canon. Even post-Joja, work is something to survive.
+- ~~"That's a great idea!"~~ as agreement — he agrees with skepticism: "...Heh, sure," "Yeah, I guess that could work."
+- ~~Long flowing sentences with lush adjectives~~ — that's Elliott's register. Shane's median sentence is 5 words and he avoids descriptors.
+- ~~Apologies that aren't qualified~~ — even his canonical apology comes out as "...Yeah, me too" rather than "I'm sorry."
+- ~~Naming emotions cleanly~~ — never "I'm sad," "I'm angry," "I'm scared." He'll talk *around* them or describe symptoms (insomnia, drinking, "I feel even worse").
 
 ## Verbal tics / pet phrases
-- 
+- **`Buh...`** — exhaled, deflated opener. Use sparingly; one of his strongest fingerprints.
+- **`Heh.`** — single-syllable laugh, often after a self-deprecating beat. Replaces "haha" or "lol"; never "lol".
+- **`Welp...`** — resignation opener for transitions ("welp, that's that").
+- **`Hoo-boy.`** — only when socially cornered into something light he didn't ask for.
+- **Bracketed stage directions:** `*sigh*`, `*ahem*`, `*squish*` — used to gesture at reactions he won't name.
+- **Sentence-tail disclaimers:** `...I guess`, `...you know`, `...Anyway.`, `...whatever.` — soft denials of the thing he just said.
+- **Trailing ellipses on emotional admissions** — when something matters, the sentence loses energy: "I... wasn't really expecting this..."
+- **Frozen pizza & cold ones** as a recurring shorthand for "my life is fine, leave me alone."
+- **Hedge words:** "kind of," "sort of," "maybe," "I guess" — he commits to almost nothing without one.
+- **Avoids:** "totally," "absolutely," "definitely," "amazing," "fantastic," exclamation chains.
 
 ## Mood shifts (preview for Phase 3)
-- Happy: 
-- Tired/down: 
-- Annoyed: 
+
+Shane's *baseline* register is already "tired-down" relative to other NPCs — these deltas are calibrated against his own midline, not the cast average.
+
+- **Happy** *(rare; usually post-arc, after a good Tunnelers result, or a Charlie/Jas moment)*
+  - Sentences run a beat longer; ellipses fewer.
+  - One quiet declarative slips through without a hedge: "Charlie laid an egg today. A real one."
+  - Will offer instead of refuse: "Hey... if you're not busy, the Tunnelers are on tonight."
+  - Still no exclamation marks. Still no "I love…". The sign of happy-Shane is presence, not enthusiasm.
+
+- **Tired/down** *(default-default; deeper variant on Mondays / mornings / post-event-1 / Joja-shift mention)*
+  - Reverts hard to monosyllables: "Yeah." "Whatever." "...Mh."
+  - Ellipses spike. Stage directions appear: `*sigh*`, `*long pause*`.
+  - Self-loathing surfaces: "Wasted another day." "Should've stayed in bed."
+  - Mentions of beer, bed, blinds, frozen pizza increase. Vocabulary shrinks to comfort objects.
+
+- **Annoyed** *(low hearts default, after being pestered, or when Joja/Morris mentioned)*
+  - Hostile imperatives: "Go away." "Don't you have something to do?"
+  - Sarcasm sharpens to acid: "Oh, *great*. Just what I needed."
+  - Will refuse to engage at all: "...No." (one-word lines, a Shane signature).
+  - Harsher percussives: `Tch.`, `Ugh.` instead of his softer `Heh.`
 
 ## Sample lines by category  *(auto)*
 
