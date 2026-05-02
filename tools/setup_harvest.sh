@@ -32,7 +32,8 @@ command -v gh >/dev/null    || { echo "✗ gh CLI not in PATH" >&2; exit 1; }
 command -v unzip >/dev/null || { echo "✗ unzip not in PATH" >&2; exit 1; }
 
 mkdir -p "$VENDOR_DIR" "$HARVEST_DIR/dialogue" "$HARVEST_DIR/events" \
-         "$HARVEST_DIR/strings" "$HARVEST_DIR/schedules"
+         "$HARVEST_DIR/strings" "$HARVEST_DIR/schedules" \
+         "$HARVEST_DIR/baseline_dialogue"
 
 # 1) Fetch StardewXnbHack Linux release if not cached.
 XNBHACK_BIN="$XNBHACK_DIR/StardewXnbHack"
@@ -141,14 +142,37 @@ for npc in "${NPCS[@]}"; do
   copy_if_exists "$UNPACKED_DIR/Characters/schedules/${npc}.json"       "$HARVEST_DIR/schedules/"
 done
 
+# Baseline corpus: every NPC's main dialogue file (English only, exclude
+# marriage/seasonal variants). Used by analyze_voice.py to score tf-idf and
+# generate tone guides for every NPC for future-phase expansion.
+if [[ -d "$UNPACKED_DIR/Characters/Dialogue" ]]; then
+  find "$UNPACKED_DIR/Characters/Dialogue" -maxdepth 1 -name '*.json' \
+       ! -regex '.*\.[a-z][a-z]-[A-Z][A-Z]\.json' \
+       ! -name 'MarriageDialogue*.json' \
+       ! -name '*_Beach.json' ! -name '*_Winter.json' \
+       ! -name 'Baby*.json' ! -name 'Assorted_*.json' \
+       -exec cp {} "$HARVEST_DIR/baseline_dialogue/" \;
+fi
+
+# Marriage dialogue for every marriageable NPC.
+mkdir -p "$HARVEST_DIR/baseline_marriage"
+if [[ -d "$UNPACKED_DIR/Characters/Dialogue" ]]; then
+  find "$UNPACKED_DIR/Characters/Dialogue" -maxdepth 1 -name 'MarriageDialogue*.json' \
+       ! -regex '.*\.[a-z][a-z]-[A-Z][A-Z]\.json' \
+       -exec cp {} "$HARVEST_DIR/baseline_marriage/" \;
+fi
+
 # Strings — small enough to take wholesale; harvest_vanilla.py will filter.
 copy_if_exists "$UNPACKED_DIR/Strings/Characters.json"      "$HARVEST_DIR/strings/"
 copy_if_exists "$UNPACKED_DIR/Strings/SpeechBubbles.json"   "$HARVEST_DIR/strings/"
 copy_if_exists "$UNPACKED_DIR/Strings/StringsFromCSFiles.json" "$HARVEST_DIR/strings/"
 
-# Events — keep all per-location files; the analyzer filters by NPC name.
+# Events — keep English-only per-location files (skip *.xx-XX.json variants).
+# The analyzer filters by NPC name within these files.
 if [[ -d "$UNPACKED_DIR/Data/Events" ]]; then
-  cp -r "$UNPACKED_DIR/Data/Events/." "$HARVEST_DIR/events/"
+  find "$UNPACKED_DIR/Data/Events" -maxdepth 1 -name '*.json' \
+       ! -regex '.*\.[a-z][a-z]-[A-Z][A-Z]\.json' \
+       -exec cp {} "$HARVEST_DIR/events/" \;
 fi
 
 # Gift tastes & NPC dispositions for context.
@@ -159,6 +183,8 @@ copy_if_exists "$UNPACKED_DIR/Data/Characters.json"       "$HARVEST_DIR/"
 echo "✓ Harvest complete → $HARVEST_DIR"
 echo "  Dialogue files: $(ls -1 "$HARVEST_DIR/dialogue" 2>/dev/null | wc -l)"
 echo "  Event files:    $(ls -1 "$HARVEST_DIR/events" 2>/dev/null | wc -l)"
+echo "  Baseline NPCs:  $(ls -1 "$HARVEST_DIR/baseline_dialogue" 2>/dev/null | wc -l)"
+echo "  Marriage files: $(ls -1 "$HARVEST_DIR/baseline_marriage" 2>/dev/null | wc -l)"
 
 # 5) Reclaim disk: the unpacked dump is ~176MB and we've already copied what
 #    we need. Pass ECI_KEEP_UNPACKED=1 to skip this for faster re-runs.
