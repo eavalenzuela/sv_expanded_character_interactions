@@ -1,7 +1,0 @@
-{
-  "Responses": {
-    "leah_q_art_yes":   { "Leah": { "Trust": 5,  "Romance": 2 } },
-    "leah_q_art_maybe": { "Leah": { "Trust": 0 } },
-    "leah_q_art_no":    { "Leah": { "Trust": -10, "Respect": -5 } }
-  }
-}

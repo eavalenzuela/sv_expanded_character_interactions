@@ -172,10 +172,48 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
     else:
         seen_ids[line_id] = file
 
-    # text
-    text = line.get("text")
-    if not isinstance(text, str) or not text.strip():
-        result.add("error", file, line_id, "missing or empty 'text'")
+    # text vs question — exactly one must be present
+    has_text = isinstance(line.get("text"), str) and line["text"].strip() != ""
+    has_question = isinstance(line.get("question"), dict)
+    if has_text and has_question:
+        result.add("error", file, line_id,
+                   "line has both 'text' and 'question'; pick one (question replaces text)")
+    elif not has_text and not has_question:
+        result.add("error", file, line_id, "missing or empty 'text' (or 'question')")
+
+    if has_question:
+        q = line["question"]
+        if not isinstance(q.get("id"), int):
+            result.add("error", file, line_id, "question.id must be an integer")
+        if not isinstance(q.get("text"), str) or not q["text"].strip():
+            result.add("error", file, line_id, "question.text missing or empty")
+        responses = q.get("responses")
+        if not isinstance(responses, list) or len(responses) < 2:
+            result.add("error", file, line_id,
+                       "question.responses must be a list of ≥2 entries")
+        else:
+            for r in responses:
+                if not isinstance(r, dict):
+                    result.add("error", file, line_id, f"response is not a mapping: {r!r}")
+                    continue
+                if not isinstance(r.get("id"), str) or not r["id"].strip():
+                    result.add("error", file, line_id, "response.id missing or not a string")
+                if not isinstance(r.get("text"), str) or not r["text"].strip():
+                    result.add("error", file, line_id, f"response {r.get('id')!r} text missing or empty")
+                affinity = r.get("affinity")
+                if affinity is not None and not isinstance(affinity, dict):
+                    result.add("error", file, line_id,
+                               f"response {r.get('id')!r} affinity must be a mapping")
+                elif isinstance(affinity, dict):
+                    for npc_name, axes in affinity.items():
+                        if not isinstance(axes, dict):
+                            result.add("error", file, line_id,
+                                       f"response {r.get('id')!r} affinity.{npc_name} must be a mapping")
+                            continue
+                        for axis, delta in axes.items():
+                            if not isinstance(delta, int):
+                                result.add("error", file, line_id,
+                                           f"response {r.get('id')!r} affinity.{npc_name}.{axis} must be int, got {type(delta).__name__}")
 
     # target_key
     target = line.get("target_key", "*")
@@ -232,6 +270,26 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
                     f"Stardew picks before weekday keys — to override at this "
                     f"location, set target_key: {loc} (not weekday keys).")
 
+    # affinity block inside When (translated to Query at build time)
+    if isinstance(when := line.get("when"), dict) and "affinity" in when:
+        aff = when["affinity"]
+        if not isinstance(aff, dict):
+            result.add("error", file, line_id, "when.affinity must be a mapping")
+        else:
+            for npc_name, axes in aff.items():
+                if not isinstance(axes, dict):
+                    result.add("error", file, line_id,
+                               f"when.affinity.{npc_name} must be a mapping")
+                    continue
+                for axis, expr in axes.items():
+                    if not isinstance(expr, str) or not re.match(
+                        r"^\s*(>=|<=|!=|==|=|>|<)\s*-?\d+\s*$", expr
+                    ):
+                        result.add(
+                            "error", file, line_id,
+                            f"when.affinity.{npc_name}.{axis} must be a string "
+                            f"like '>=5', '<3', '=0', '!=10', got {expr!r}")
+
     # when block
     when = line.get("when")
     if when is not None:
@@ -239,6 +297,8 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
             result.add("error", file, line_id, "'when' must be a mapping")
         else:
             for k, v in when.items():
+                if k == "affinity":
+                    continue  # handled above
                 if not isinstance(k, str):
                     result.add("error", file, line_id,
                                f"when key {k!r} must be a string")

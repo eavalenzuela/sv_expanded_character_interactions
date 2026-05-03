@@ -338,21 +338,39 @@ lines:
 
   # Smoke test: at LeahHouse, Leah asks the player about her current
   # piece. Choices test all three sign cases (positive, neutral, negative).
+  # build_cp.py expands `question:` into Stardew $q/$r syntax and
+  # registers the response→affinity-deltas mapping in responses.json.
   - id: leah_q_art_branching
     target_key: any_day
     when:
       LocationName: LeahHouse
-    text: "$q 1601 fallback#Want to see what I'm working on?#$r 1601 0 leah_q_art_yes#Yes, I'd love to.#$r 1601 0 leah_q_art_maybe#Maybe another time.#$r 1601 0 leah_q_art_no#Why? It's just rocks."
+    question:
+      id: 1601
+      fallback: fallback
+      text: "Want to see what I'm working on?"
+      responses:
+        - id: leah_q_art_yes
+          text: "Yes, I'd love to."
+          affinity:
+            Leah: { Trust: 5, Romance: 2 }
+        - id: leah_q_art_maybe
+          text: "Maybe another time."
+        - id: leah_q_art_no
+          text: "Why? It's just rocks."
+          affinity:
+            Leah: { Trust: -10, Respect: -5 }
 
-  # Trust-gated follow-up: once Trust ≥ 5 (i.e., the player picked
-  # "Yes, I'd love to." at least once), this line takes over the
+  # Trust-gated follow-up: once Trust ≥ 5, this line takes over the
   # LeahHouse slot — proving the affinity → CP-token → conditional-
-  # dialogue loop closes end-to-end.
+  # dialogue loop closes end-to-end. build_cp.py translates the
+  # `affinity:` block into a CP {{Query: ...}} entry.
   - id: leah_high_trust_checkin
     target_key: any_day
     when:
       LocationName: LeahHouse
-      "{{Query: {{eavalenzuela.ECI.Tokens/Affinity_Leah_Trust}} >= 5}}": "true"
+      affinity:
+        Leah:
+          Trust: ">=5"
     text: "Hey — thanks for asking about my work the other day. It mattered.$h"
 
   # =====================================================================

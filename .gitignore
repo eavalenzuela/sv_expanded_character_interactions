@@ -10,6 +10,9 @@ ECI.Content/content.json
 # Generated test-harness scenarios (built from source/scenarios/*.yaml)
 ECI.TestHarness/scenarios/
 
+# Generated branching-dialogue response config (built from source/dialogue/*.yaml)
+ECI.Tokens/responses.json
+
 # .NET
 **/bin/
 **/obj/
