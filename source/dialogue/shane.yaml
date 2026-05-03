@@ -1,0 +1,305 @@
+# Shane dialogue — all axes.
+#
+# Voice (per tone guide):
+#   - Default: terse, dismissive, often hostile. Mean sentence ~6 words.
+#   - !-rate 0.68 (very low). ...-rate 7.52 (highest of the four).
+#   - Verbal tics: "Buh...", "Heh.", "Welp...", "*sigh*", "...I guess",
+#     "...Anyway.", "...you know", "kind of", "sort of".
+#   - Topics: chickens (esp. Charlie), Tunnelers, Joja, beer/saloon,
+#     frozen pizza, video games, Marnie/Jas, recovery (fragile).
+#   - Avoids: gushing, declarations of feeling, "totally"/"amazing",
+#     long flowing sentences, exclamation chains.
+#
+# Targeting strategy (Shane is simpler than Leah):
+#   - No vanilla `<season>_<weekday>` keys exist for Shane → plain
+#     Mon..Sun works year-round.
+#   - No vanilla location-keys (Beach/Mountain/etc.) → location lines
+#     can target weekday keys with When LocationName.
+#   - Heart-gated `<weekday>N` keys (Mon2, Mon4, Mon6, Mon8, Mon10) are
+#     vanilla; our weekday overrides only fire below 2 hearts. That's
+#     intentional for MVP — our content is the introductory layer.
+
+npc: Shane
+
+lines:
+  # =====================================================================
+  # AXIS: season — 8 lines (2/season)
+  # =====================================================================
+
+  - id: shane_season_spring_dodge
+    target_key: [Mon, Wed, Fri]
+    when:
+      Season: Spring
+    text: "Buh... everything's growing again. ...Yay, I guess."
+
+  - id: shane_season_spring_pollen
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      Season: Spring
+    text: "Stupid pollen. I keep sneezing on the eggs... Marnie's annoyed."
+
+  - id: shane_season_summer_heat
+    target_key: [Mon, Wed, Fri]
+    when:
+      Season: Summer
+    text: "It's too hot to do anything. Even drinking feels like a chore. Heh."
+
+  - id: shane_season_summer_crowd
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      Season: Summer
+    text: "Tourists at the saloon all summer. They tip badly. ...I don't know why I notice."
+
+  - id: shane_season_fall_tunnelers
+    target_key: [Mon, Wed, Fri]
+    when:
+      Season: Fall
+    text: "Tunnelers are 2-3. ...Anyway."
+
+  - id: shane_season_fall_dark
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      Season: Fall
+    text: "Sun's setting earlier. ...My favorite kind of day, actually."
+
+  - id: shane_season_winter_inside
+    target_key: [Mon, Wed, Fri]
+    when:
+      Season: Winter
+    text: "Cold out. I'm grateful for the four walls. Heh — never thought I'd say that."
+
+  - id: shane_season_winter_coop
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      Season: Winter
+    text: "It's freezing in the chicken coop. Charlie hates it. ...So do I."
+
+  # =====================================================================
+  # AXIS: weather — 5 lines
+  # =====================================================================
+
+  - id: shane_weather_rain_relief
+    target_key: "*"
+    when:
+      Weather: Rain
+    text: "Rain. Means I don't have to pretend to enjoy the outdoors. ...One small mercy."
+
+  - id: shane_weather_storm_volume
+    target_key: "*"
+    when:
+      Weather: Storm
+    text: "Storms are loud enough to drown out everything else. ...That's not nothing."
+
+  - id: shane_weather_snow_pizza
+    target_key: "*"
+    when:
+      Weather: Snow
+    text: "Snow's good for staying inside with frozen pizza. ...Anyway."
+
+  - id: shane_weather_wind_charlie
+    target_key: "*"
+    when:
+      Weather: Wind
+    text: "Wind's making the chickens nervous. Buh — should check on Charlie."
+
+  - id: shane_weather_greenrain_weird
+    target_key: "*"
+    when:
+      Weather: GreenRain
+    text: "Green rain... ugh. The whole town's been weird about it. ...I'll be at the saloon."
+
+  # =====================================================================
+  # AXIS: time-of-day — 6 lines
+  # =====================================================================
+
+  - id: shane_time_morning_alarm
+    target_key: [Mon, Wed, Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "*sigh* ...Why is it morning. Already."
+
+  - id: shane_time_morning_coffee
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "Haven't had coffee yet. You probably want to come back later... or don't. Whatever."
+
+  - id: shane_time_midday_pretending
+    target_key: "*"
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": midday
+    text: "Marnie's break time. I'm pretending to work. Heh."
+
+  - id: shane_time_evening_saloon
+    target_key: "*"
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": evening
+    text: "Heading to the saloon in a bit. ...You can come, I guess."
+
+  - id: shane_time_late_couldnt_sleep
+    target_key: [Mon, Wed, Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Late. I'm... actually just up. Couldn't sleep."
+
+  - id: shane_time_late_charlie
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Buh... late. Yeah. Charlie kept me up earlier. She's been weird."
+
+  # =====================================================================
+  # AXIS: day-of-week — 6 lines (skip Tuesday)
+  # =====================================================================
+
+  - id: shane_dow_mon_joja
+    target_key: [Mon]
+    text: "*sigh* Monday. ...You don't want to know."
+
+  - id: shane_dow_wed_halfway
+    target_key: [Wed]
+    text: "Wednesday. Halfway through the week. ...Welp."
+
+  - id: shane_dow_thu_doublepints
+    target_key: [Thu]
+    text: "Thursday. Two-for-one beers at the saloon if you're a regular. ...Don't ask how I know."
+
+  - id: shane_dow_fri_almost
+    target_key: [Fri]
+    text: "Friday. Tunnelers play Saturday. ...Maybe it'll be different this time."
+
+  - id: shane_dow_sat_tunnelers
+    target_key: [Sat]
+    text: "Tunnelers game day. ...I'm trying not to drink before kickoff."
+
+  - id: shane_dow_sun_couch
+    target_key: [Sun]
+    text: "Sunday. Marnie's at church. I'm on the couch. ...Don't tell her."
+
+  # =====================================================================
+  # AXIS: location — 8 lines
+  # =====================================================================
+
+  - id: shane_loc_marnies_charlie
+    target_key: "*"
+    when:
+      LocationName: AnimalShop
+    text: "Just feeding Charlie. ...Don't make a big deal of it."
+
+  - id: shane_loc_saloon_corner
+    target_key: "*"
+    when:
+      LocationName: Saloon
+    text: "My corner. The lights are dim enough. ...What."
+
+  - id: shane_loc_town_avoiding
+    target_key: "*"
+    when:
+      LocationName: Town
+    text: "Don't usually come up to town. ...What do you want?"
+
+  - id: shane_loc_forest_long_way
+    target_key: "*"
+    when:
+      LocationName: Forest
+    text: "Walking the long way back from work. ...Yes I know that's weird."
+
+  - id: shane_loc_beach_quiet
+    target_key: "*"
+    when:
+      LocationName: Beach
+    text: "I come here when I don't want to talk. Buh — you're defeating the purpose, aren't you?"
+
+  - id: shane_loc_mountain_dragged
+    target_key: "*"
+    when:
+      LocationName: Mountain
+    text: "Marnie sent me up here for something... I forgot what."
+
+  - id: shane_loc_busstop_ontime
+    target_key: "*"
+    when:
+      LocationName: BusStop
+    text: "Watching the bus come in. ...It's the only thing that arrives on time around here."
+
+  # Vanilla has a `JojaMart` location-key for Shane; target it directly.
+  - id: shane_loc_joja_shift
+    target_key: JojaMart
+    text: "Stocking shelves. ...If you're here for the pep rally, you missed it."
+
+  # =====================================================================
+  # AXIS: recent player action — 8 lines (5 flags)
+  # =====================================================================
+
+  - id: shane_did_chopped_axe
+    target_key: [Mon, Wed, Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "Heard you've been swinging an axe today. ...Hope you didn't hit anything important."
+
+  - id: shane_did_chopped_labor
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "Manual labor, huh? Heh. ...How's that going."
+
+  - id: shane_did_fish_smell
+    target_key: [Mon, Wed, Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "You smell like fish. Buh — sorry. That came out worse than I meant."
+
+  - id: shane_did_fish_grandpa
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "Fishing again? My grandfather used to do that. ...Nevermind."
+
+  - id: shane_did_gift_kind
+    target_key: [Mon, Wed, Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
+    text: "Heard you brought someone something today. ...That's nice. I guess."
+
+  - id: shane_did_gift_marnie
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
+    text: "Marnie said you gave somebody a gift today. ...She doesn't usually mention things. Means you did good."
+
+  - id: shane_did_mine_dust
+    target_key: "*"
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": enteredMine
+    text: "You went in the mines? *sigh* Don't get yourself killed. ...Marnie would never forgive me."
+
+  - id: shane_did_passedout_please
+    target_key: "*"
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": passedOut
+    text: "Heard you passed out. ...Buh. Take it easier, okay? ...Please."
+
+  # =====================================================================
+  # MULTI-AXIS overrides (most specific — must come last)
+  # =====================================================================
+
+  - id: shane_saloon_evening_order
+    target_key: "*"
+    when:
+      LocationName: Saloon
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": evening
+    text: "Order of operations: beer, beer, eat the peanuts, beer.$h"
+
+  - id: shane_saloon_late_should_go
+    target_key: "*"
+    when:
+      LocationName: Saloon
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "It's late. I should... probably go home. Heh. We both know I won't."
+
+  - id: shane_marnies_rain_coop
+    target_key: "*"
+    when:
+      LocationName: AnimalShop
+      Weather: Rain
+    text: "Buh... rain. Coop's leaking again. *sigh*"
