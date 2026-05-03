@@ -29,13 +29,32 @@ OUT = REPO / "ECI.Content"
 INCLUDE = OUT / "include"
 
 WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+SEASONS = ["spring", "summer", "fall", "winter"]
 
 CP_FORMAT = "2.0.0"
 
 
+def any_day_keys() -> list[str]:
+    """All weekday keys an NPC's daily-dialogue selection might land on:
+    plain `Mon..Sun` (spring fallback) plus `<season>_<weekday>` for
+    summer/fall/winter. 7 + 21 = 28 keys.
+
+    Use when a line should fire on a context (e.g., a weather condition)
+    that's independent of season or weekday.
+    """
+    keys = list(WEEKDAYS)
+    for s in ("summer", "fall", "winter"):
+        keys.extend(f"{s}_{w}" for w in WEEKDAYS)
+    return keys
+
+
 def expand_target_keys(target_key: Any) -> list[str]:
     if isinstance(target_key, str):
-        return WEEKDAYS[:] if target_key == "*" else [target_key]
+        if target_key == "*":
+            return WEEKDAYS[:]
+        if target_key == "any_day":
+            return any_day_keys()
+        return [target_key]
     if isinstance(target_key, list):
         out: list[str] = []
         for t in target_key:

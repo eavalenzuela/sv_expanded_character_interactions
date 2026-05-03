@@ -5,8 +5,17 @@
 #   lines[]:
 #     id:          unique string (used as CP LogName)
 #     target_key:  string | list | "*" (default "*" = all 7 base weekdays)
+#                  Macros: "*" = Mon..Sun
+#                          "any_day" = Mon..Sun + <season>_<weekday> for
+#                                      summer/fall/winter (28 keys)
 #     when:        map of CP token name → value (ANDed)
 #     text:        string (Stardew dialogue; may use $h/$e/etc.)
+#
+# ORDERING RULE (load-order matters!):
+#   CP applies EditData patches in YAML order; last write wins. So
+#   *more-specific* lines (multi-axis Whens) must appear *later* than
+#   less-specific ones, so they overwrite the catch-all on the few
+#   contexts where both match.
 #
 # Targeting strategy:
 #   - Spring: Leah has no vanilla `spring_<weekday>` keys → target plain
@@ -18,46 +27,10 @@ npc: Leah
 
 lines:
   # =====================================================================
-  # AXIS: weather × location
-  # =====================================================================
-  - id: leah_forest_rain_listen
-    when:
-      Weather: Rain
-      LocationName: Forest
-    text: "The rain on the leaves is its own kind of music.$h"
-
-  # =====================================================================
-  # AXIS: recent player action (custom token)
-  # =====================================================================
-  - id: leah_chopped_tree_callback
-    when:
-      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
-    text: "I heard you out there with the axe today. Did the wood split clean?"
-
-  # =====================================================================
-  # AXIS: time-of-day × location
-  # =====================================================================
-  - id: leah_late_evening_studio
-    when:
-      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
-      LocationName: LeahHouse
-    text: "Mmm... I work better when the world's gone quiet. The shapes come easier."
-
-  # =====================================================================
-  # AXIS: season × time-of-day × location
-  # =====================================================================
-  - id: leah_winter_morning_warmth
-    when:
-      Season: Winter
-      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
-      LocationName: LeahHouse
-    text: "Mmm — the cabin's warmer than I thought it'd be this morning."
-
-  # =====================================================================
-  # AXIS: season (8 lines, 2 per season, distributed across weekdays)
+  # AXIS: season — 1-axis baselines
   # =====================================================================
 
-  # ---- Spring (no vanilla spring_<weekday> keys → use plain weekdays) ----
+  # ---- Spring (no vanilla spring_<weekday> → plain weekdays + Season When) ----
   - id: leah_season_spring_pine
     target_key: [Mon, Wed, Fri]
     when:
@@ -70,7 +43,7 @@ lines:
       Season: Spring
     text: "I came home covered in mud. Worth it — the spring foraging is wild this year."
 
-  # ---- Summer (target summer_<weekday>; key implies season) ----
+  # ---- Summer ----
   - id: leah_season_summer_herbs
     target_key: [summer_Mon, summer_Wed, summer_Fri]
     text: "It's almost too warm to work. I've been hauling water and hanging herbs to dry instead."
@@ -79,7 +52,7 @@ lines:
     target_key: [summer_Tue, summer_Thu, summer_Sat, summer_Sun]
     text: "Mmm — found a whole patch of wild thyme this morning. Going to make pasta with it tonight.$h"
 
-  # ---- Fall (target fall_<weekday>; covers fall_Thu which vanilla lacks) ----
+  # ---- Fall ----
   - id: leah_season_fall_light
     target_key: [fall_Mon, fall_Wed, fall_Fri]
     text: "The light's so different now. I keep wanting to capture how the leaves turn translucent at sunset."
@@ -88,7 +61,7 @@ lines:
     target_key: [fall_Tue, fall_Thu, fall_Sat, fall_Sun]
     text: "Mushrooms everywhere right now. I've been adding them to almost everything I cook."
 
-  # ---- Winter (target winter_<weekday>) ----
+  # ---- Winter ----
   - id: leah_season_winter_slow
     target_key: [winter_Mon, winter_Wed, winter_Fri]
     text: "I love how slow winter goes. Time stretches when you can't rush anywhere outside.$h"
@@ -96,3 +69,79 @@ lines:
   - id: leah_season_winter_carve
     target_key: [winter_Tue, winter_Thu, winter_Sat, winter_Sun]
     text: "There's something about the way snow rests on bare wood. Makes me want to carve simpler shapes."
+
+  # =====================================================================
+  # AXIS: weather — 1-axis baselines (any_day = 28 keys)
+  # =====================================================================
+
+  - id: leah_weather_rain_smells
+    target_key: any_day
+    when:
+      Weather: Rain
+    text: "Mmm — the rain pulls everything's smell out at once. Earth, leaves, even the wood's been waiting for this."
+
+  - id: leah_weather_storm_cabin
+    target_key: any_day
+    when:
+      Weather: Storm
+    text: "Storms make the cabin feel small in a good way. I've just been sitting and watching."
+
+  - id: leah_weather_snow_simplify
+    # Snow only happens in winter, so just target winter_<weekday>.
+    target_key: [winter_Mon, winter_Tue, winter_Wed, winter_Thu, winter_Fri, winter_Sat, winter_Sun]
+    when:
+      Weather: Snow
+    text: "Everything's outlined in snow. I've been sketching today instead of carving — the shapes already simplified themselves."
+
+  - id: leah_weather_wind_unsettled
+    target_key: any_day
+    when:
+      Weather: Wind
+    text: "The wind keeps moving things. Hard to focus on anything that wants to stay still."
+
+  - id: leah_weather_greenrain_moss
+    # GreenRain only in summer (canon dates); spring + summer keys cover it.
+    target_key: [Mon, Tue, Wed, Thu, Fri, Sat, Sun,
+                 summer_Mon, summer_Tue, summer_Wed, summer_Thu, summer_Fri, summer_Sat, summer_Sun]
+    when:
+      Weather: GreenRain
+    text: "Green rain... I keep wanting to know what the moss feels like underfoot. Soft, I think. Like wool."
+
+  # =====================================================================
+  # AXIS: recent player action (custom token)
+  # =====================================================================
+
+  - id: leah_chopped_tree_callback
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "I heard you out there with the axe today. Did the wood split clean?"
+
+  # =====================================================================
+  # MULTI-AXIS overrides (more specific → must come AFTER 1-axis lines
+  # to win in CP's load-order resolution).
+  # =====================================================================
+
+  # weather × location: rainy day in the Forest specifically.
+  - id: leah_forest_rain_listen
+    target_key: any_day
+    when:
+      Weather: Rain
+      LocationName: Forest
+    text: "The rain on the leaves is its own kind of music.$h"
+
+  # time × location: late evening in her cabin.
+  - id: leah_late_evening_studio
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+      LocationName: LeahHouse
+    text: "Mmm... I work better when the world's gone quiet. The shapes come easier."
+
+  # season × time × location: winter morning at her cabin.
+  - id: leah_winter_morning_warmth
+    target_key: [winter_Mon, winter_Tue, winter_Wed, winter_Thu, winter_Fri, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+      LocationName: LeahHouse
+    text: "Mmm — the cabin's warmer than I thought it'd be this morning."

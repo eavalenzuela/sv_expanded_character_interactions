@@ -198,6 +198,11 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
         for t in targets:
             if t == "*":
                 resolved.extend(WEEKDAYS)
+            elif t == "any_day":
+                # 7 plain + 7×3 season-prefixed; mirrors build_cp.any_day_keys()
+                resolved.extend(WEEKDAYS)
+                for season in ("summer", "fall", "winter"):
+                    resolved.extend(f"{season}_{w}" for w in WEEKDAYS)
             else:
                 resolved.append(t)
         suspicious = [
