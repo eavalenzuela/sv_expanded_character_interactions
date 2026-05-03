@@ -261,14 +261,71 @@ lines:
     text: "Gus's vegetable soup is the only reason I come in for the noise. Honestly worth it.$h"
 
   # =====================================================================
-  # AXIS: recent player action (custom token)
+  # AXIS: recent player action (custom token PlayerDidToday)
+  # 8 lines covering 5 flags: choppedTree, caughtFish, gaveGift,
+  # enteredMine, passedOut. Higher-priority flags listed last so they
+  # win on rare multi-flag days (passedOut > enteredMine > the rest).
+  # Same-flag variance via Mon/Wed/Fri vs Tue/Thu/Sat/Sun day-split.
   # =====================================================================
 
-  - id: leah_chopped_tree_callback
-    target_key: any_day
+  # ---- choppedTree (2 lines, day-split) ----
+  - id: leah_did_chopped_callback
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
     when:
       "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
     text: "I heard you out there with the axe today. Did the wood split clean?"
+
+  - id: leah_did_chopped_sap
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "You came by smelling like fresh-cut sap. Lost in the wood today?$h"
+
+  # ---- caughtFish (2 lines, day-split) ----
+  - id: leah_did_fish_smell
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "Mmm — you've been by the water today. Salt and that one specific kind of mud."
+
+  - id: leah_did_fish_reflection
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "Out fishing today? I tried it once. Mostly caught my own reflection."
+
+  # ---- gaveGift (1 line — recipient unspecified by token) ----
+  - id: leah_did_gift_collect
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
+    text: "Heard you brought someone a gift today. Small things like that — they collect over time."
+
+  # ---- enteredMine (1 line) ----
+  - id: leah_did_mine_dust
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": enteredMine
+    text: "You've got a different look about you today. The mines, maybe? They leave a kind of dust on people."
+
+  # ---- passedOut (1 line, last so it wins on rare multi-flag days) ----
+  - id: leah_did_passedout_rest
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": passedOut
+    text: "I heard you passed out somewhere recently. Take it easier — sleep is part of the work, too."
 
   # =====================================================================
   # MULTI-AXIS overrides (more specific → must come AFTER 1-axis lines
