@@ -215,6 +215,23 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
                 f"target_key(s) {sorted(set(suspicious))} are neither in vanilla "
                 f"{npc}.json nor a recognized Stardew dialogue key pattern — possible typo.")
 
+    # If a line has When LocationName=X and vanilla has a key named X,
+    # Stardew will pick the `X` key BEFORE weekday selection — so our
+    # weekday-targeted override never fires there. Must target the
+    # location-key directly.
+    if isinstance(when := line.get("when"), dict):
+        loc = when.get("LocationName")
+        if isinstance(loc, str) and baseline is not None and loc in baseline:
+            targets_match_loc_key = (
+                isinstance(target, str) and target == loc
+            ) or (isinstance(target, list) and loc in target)
+            if not targets_match_loc_key:
+                result.add(
+                    "warning", file, line_id,
+                    f"vanilla {npc}.json has a `{loc}` location-key which "
+                    f"Stardew picks before weekday keys — to override at this "
+                    f"location, set target_key: {loc} (not weekday keys).")
+
     # when block
     when = line.get("when")
     if when is not None:

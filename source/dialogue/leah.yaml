@@ -108,6 +108,73 @@ lines:
     text: "Green rain... I keep wanting to know what the moss feels like underfoot. Soft, I think. Like wool."
 
   # =====================================================================
+  # AXIS: location — 1-axis baselines (8 lines, distributed)
+  # =====================================================================
+
+  # ---- Forest (her primary outdoor habitat — 2 lines, day-split) ----
+  - id: leah_loc_forest_beetle
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      LocationName: Forest
+    text: "Lost half the morning watching a beetle hollow out a log. Couldn't help it — the texture was unbelievable."
+
+  - id: leah_loc_forest_quiet
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      LocationName: Forest
+    text: "This part of the forest holds the quiet better. I think the moss eats the sound."
+
+  # ---- LeahHouse (her cabin — 2 lines, day-split) ----
+  - id: leah_loc_cabin_bread
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      LocationName: LeahHouse
+    text: "Come in — I was just pulling bread from the stove. Cabin smells like a bakery for once, instead of wood shavings."
+
+  - id: leah_loc_cabin_afternoon
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      LocationName: LeahHouse
+    text: "The light hits the back wall in the late afternoon. I time the fine work for it."
+
+  # ---- Single-line locations ----
+  - id: leah_loc_town_pretty
+    target_key: any_day
+    when:
+      LocationName: Town
+    text: "Pelican Town's prettier than I remember. Maybe I just don't come here enough."
+
+  # Vanilla has a `Beach` location-key for Leah, which Stardew picks
+  # BEFORE weekday selection. We must target that key directly to override.
+  - id: leah_loc_beach_motion
+    target_key: Beach
+    text: "Mmm — I keep coming back to the way the sand sucks back when a wave pulls. Pure motion."
+
+  - id: leah_loc_mountain_stone
+    target_key: any_day
+    when:
+      LocationName: Mountain
+    text: "The stone up here's a totally different temperature than the wood I work with. Cold and certain."
+
+  - id: leah_loc_saloon_soup
+    target_key: any_day
+    when:
+      LocationName: Saloon
+    text: "Gus's vegetable soup is the only reason I come in for the noise. Honestly worth it.$h"
+
+  # =====================================================================
   # AXIS: recent player action (custom token)
   # =====================================================================
 
