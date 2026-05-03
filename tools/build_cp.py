@@ -21,6 +21,8 @@ from typing import Any
 
 import yaml
 
+from lint_dialogue import lint_all
+
 REPO = Path(__file__).resolve().parent.parent
 SOURCE = REPO / "source" / "dialogue"
 OUT = REPO / "ECI.Content"
@@ -29,23 +31,6 @@ INCLUDE = OUT / "include"
 WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 CP_FORMAT = "2.0.0"
-
-
-# ---------- validation ----------
-
-def validate_line(line: dict[str, Any], yaml_path: Path) -> list[str]:
-    errors: list[str] = []
-    if "id" not in line:
-        errors.append(f"{yaml_path}: line missing 'id'")
-    if "text" not in line:
-        errors.append(f"{yaml_path}: line {line.get('id', '?')} missing 'text'")
-    when = line.get("when")
-    if when is not None and not isinstance(when, dict):
-        errors.append(f"{yaml_path}: line {line.get('id', '?')} 'when' must be a mapping")
-    target = line.get("target_key", "*")
-    if not isinstance(target, (str, list)):
-        errors.append(f"{yaml_path}: line {line.get('id', '?')} bad 'target_key'")
-    return errors
 
 
 def expand_target_keys(target_key: Any) -> list[str]:
@@ -115,30 +100,27 @@ def main() -> int:
         print(f"✗ No YAML files in {SOURCE}", file=sys.stderr)
         return 1
 
-    all_errors: list[str] = []
+    # Lint pass — refuse to build on errors, print warnings.
+    lint_result = lint_all(yaml_files)
+    if lint_result.errors:
+        print("Lint errors — aborting build:", file=sys.stderr)
+        for issue in lint_result.errors:
+            print(f"  {issue}", file=sys.stderr)
+        return 1
+    if lint_result.warnings:
+        print(f"Lint warnings ({len(lint_result.warnings)}):", file=sys.stderr)
+        for issue in lint_result.warnings:
+            print(f"  {issue}", file=sys.stderr)
+        print(file=sys.stderr)
+
     fragment_paths: list[str] = []
     total_lines = 0
     total_changes = 0
 
     for yaml_path in yaml_files:
-        raw = yaml_path.read_text(encoding="utf-8")
-        data = yaml.safe_load(raw)
-        if not isinstance(data, dict) or "npc" not in data or "lines" not in data:
-            all_errors.append(f"{yaml_path}: missing 'npc' or 'lines'")
-            continue
-
+        data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
         npc = data["npc"]
         lines = data["lines"]
-        if not isinstance(lines, list):
-            all_errors.append(f"{yaml_path}: 'lines' must be a list")
-            continue
-
-        for line in lines:
-            all_errors.extend(validate_line(line, yaml_path))
-
-        if all_errors:
-            continue
-
         fragment = build_npc_fragment(npc, lines)
         out_path = INCLUDE / f"{npc.lower()}.json"
         out_path.write_text(json.dumps(fragment, indent=2) + "\n", encoding="utf-8")
@@ -147,11 +129,6 @@ def main() -> int:
         total_lines += len(lines)
         total_changes += len(fragment["Changes"])
         print(f"  · {npc}: {len(lines)} lines → {len(fragment['Changes'])} CP changes → {rel}")
-
-    if all_errors:
-        for e in all_errors:
-            print(f"✗ {e}", file=sys.stderr)
-        return 1
 
     root = build_root(fragment_paths)
     (OUT / "content.json").write_text(json.dumps(root, indent=2) + "\n", encoding="utf-8")
