@@ -1,0 +1,97 @@
+# Static dialogue-selection scenarios for the simulator.
+# Run with:  python3 tools/simulate_selection.py --scenarios tools/test_scenarios.yaml
+#
+# Each scenario asserts what key Stardew should pick under a given context
+# AND which source (vanilla vs. our override) should win. If real in-game
+# behavior diverges from these predictions, we either modeled wrong or
+# Stardew is doing something we don't simulate.
+
+- name: Linus on Fri morning at Mountain — sentinel should fire
+  npc: Linus
+  context:
+    season: spring
+    day: 5
+    weekday: Fri
+    location: Mountain
+    weather: Sun
+    hearts: 0
+    time_bucket: morning
+  expect_source: override
+  expect_key: Fri
+  expect_log_name: linus_eci_sentinel/Fri
+
+- name: Linus at 4 hearts on Fri — vanilla Fri4 should beat our Fri
+  npc: Linus
+  context:
+    season: spring
+    day: 5
+    weekday: Fri
+    location: Mountain
+    weather: Sun
+    hearts: 4
+    time_bucket: morning
+  expect_source: vanilla
+  expect_key: Fri4
+
+- name: Linus chopped-tree callback fires when did=choppedTree
+  npc: Linus
+  context:
+    season: spring
+    day: 5
+    weekday: Fri
+    location: Mountain
+    weather: Sun
+    hearts: 0
+    did: [choppedTree]
+  expect_source: override
+  expect_log_name: linus_chopped_callback/Fri
+
+- name: Linus late-evening fires at TimeOfDayBucket=late
+  npc: Linus
+  context:
+    season: spring
+    day: 5
+    weekday: Fri
+    location: Mountain
+    weather: Sun
+    hearts: 0
+    time_bucket: late
+  expect_source: override
+  expect_log_name: linus_late_evening/Fri
+
+- name: Leah forest-rain fires in Forest + Rain
+  npc: Leah
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: Forest
+    weather: Rain
+    hearts: 0
+  expect_source: override
+  expect_log_name: leah_forest_rain_listen/Mon
+
+- name: Leah at home on a Mon with no conditions matching → vanilla Mon
+  npc: Leah
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: Town
+    weather: Sun
+    hearts: 0
+  expect_source: vanilla
+  expect_key: Mon
+
+- name: Leah late-evening studio fires at LeahHouse + late
+  npc: Leah
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: LeahHouse
+    weather: Sun
+    hearts: 0
+    time_bucket: late
+  expect_source: override
+  expect_log_name: leah_late_evening_studio/Mon
