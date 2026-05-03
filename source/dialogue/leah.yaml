@@ -108,6 +108,61 @@ lines:
     text: "Green rain... I keep wanting to know what the moss feels like underfoot. Soft, I think. Like wool."
 
   # =====================================================================
+  # AXIS: time-of-day — 1-axis baselines (6 lines)
+  # Buckets: morning (≤11:00), midday (11–15), evening (15–19), late (19+).
+  # Placed BEFORE location/recent-action so those win on overlap (location
+  # feels more "in the moment" than ambient time mood).
+  # =====================================================================
+
+  - id: leah_time_morning_coffee
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "Mm — I haven't had my coffee yet. Brain's still loose."
+
+  - id: leah_time_morning_quiet
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "The first hour after waking is for thinking. Before words start being asked of me."
+
+  - id: leah_time_midday_lunch
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": midday
+    text: "Lunchtime brain. Trying to convince myself a sandwich isn't an interruption."
+
+  - id: leah_time_evening_gold
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": evening
+    text: "I usually quit by now. The light goes gold and I just want to look at things instead of making them.$h"
+
+  - id: leah_time_late_frog
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "There's a frog out by the river that only sings this late. I keep finding excuses to be near it."
+
+  - id: leah_time_late_varnish
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Mmm... late visit. I should head home soon — I varnished a piece today and the wood's probably still tacky."
+
+  # =====================================================================
   # AXIS: location — 1-axis baselines (8 lines, distributed)
   # =====================================================================
 
