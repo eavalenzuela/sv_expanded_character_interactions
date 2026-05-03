@@ -21,6 +21,7 @@ Returns exit code 1 on any error; warnings only print.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -28,6 +29,31 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+
+# Patterns Stardew's dialogue-selection algorithm actually probes. A
+# target_key matching any of these is valid even if absent from vanilla:
+# CP just adds it, and Stardew will pick it under matching context.
+SEASONS = "spring|summer|fall|winter"
+WEEKDAYS_RE = "Mon|Tue|Wed|Thu|Fri|Sat|Sun"
+DIALOGUE_KEY_PATTERNS = [
+    re.compile(rf"^({WEEKDAYS_RE})\d*$"),                       # Mon, Mon4
+    re.compile(rf"^({SEASONS})_({WEEKDAYS_RE})\d*$"),           # spring_Mon, summer_Fri4
+    re.compile(rf"^({SEASONS})_\d+$"),                          # spring_5
+    re.compile(r"^\d+$"),                                       # 5 (day of month)
+    re.compile(r"^Introduction$"),
+    re.compile(r"^MovieInvitation$"),
+    re.compile(r"^Resort.*$"),
+    re.compile(r"^GreenRain.*$"),
+    re.compile(r"^Marriage.*$"),
+    re.compile(r"^married(_.*)?$"),
+    re.compile(r"^dating(_.*)?$"),
+    re.compile(rf"^Beach$|^Mountain$|^Town$|^Forest$|^Desert$|^Saloon$"),
+    re.compile(rf"^({SEASONS})$"),                              # plain season
+]
+
+
+def looks_like_dialogue_key(key: str) -> bool:
+    return any(p.match(key) for p in DIALOGUE_KEY_PATTERNS)
 
 REPO = Path(__file__).resolve().parent.parent
 SOURCE = REPO / "source" / "dialogue"
@@ -162,7 +188,10 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
                    f"'target_key' must be string or list, got {type(target).__name__}")
         targets = []
 
-    # Validate that resolved target keys exist in the NPC's vanilla file.
+    # Validate that resolved target keys exist in vanilla OR look like a
+    # known Stardew dialogue key pattern. Adding a new entry that matches
+    # Stardew's selection patterns is valid (CP extends the dict), so we
+    # only warn when the target looks like it could be a typo.
     baseline = baseline_keys_for(npc)
     if baseline is not None:
         resolved: list[str] = []
@@ -171,12 +200,15 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
                 resolved.extend(WEEKDAYS)
             else:
                 resolved.append(t)
-        missing = [k for k in resolved if k not in baseline]
-        if missing:
+        suspicious = [
+            k for k in resolved
+            if k not in baseline and not looks_like_dialogue_key(k)
+        ]
+        if suspicious:
             result.add(
                 "warning", file, line_id,
-                f"target_key(s) not present in vanilla {npc}.json: {sorted(set(missing))} "
-                f"— these patches will silently never fire.")
+                f"target_key(s) {sorted(set(suspicious))} are neither in vanilla "
+                f"{npc}.json nor a recognized Stardew dialogue key pattern — possible typo.")
 
     # when block
     when = line.get("when")

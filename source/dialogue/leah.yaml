@@ -1,42 +1,98 @@
-# Smoke-test dialogue for Leah.
-# Each entry conditionally overrides her weekday dialogue keys; vanilla
-# lines remain in place when our `when` clause doesn't match.
+# Leah dialogue. Organized by axis.
 #
 # Schema:
 #   npc:        string
 #   lines[]:
 #     id:          unique string (used as CP LogName)
-#     target_key:  string | list | "*" (default "*" = all 7 weekdays)
+#     target_key:  string | list | "*" (default "*" = all 7 base weekdays)
 #     when:        map of CP token name → value (ANDed)
-#     text:        string (Stardew dialogue, may use $h/$e/etc.)
+#     text:        string (Stardew dialogue; may use $h/$e/etc.)
+#
+# Targeting strategy:
+#   - Spring: Leah has no vanilla `spring_<weekday>` keys → target plain
+#     `Mon..Sun` and add `when.Season: Spring`.
+#   - Summer/Fall/Winter: vanilla covers `<season>_<weekday>`, so target
+#     those directly. No Season When needed (key implies season).
 
 npc: Leah
 
 lines:
-  # 1. Weather + location: rainy day in the Forest.
+  # =====================================================================
+  # AXIS: weather × location
+  # =====================================================================
   - id: leah_forest_rain_listen
     when:
       Weather: Rain
       LocationName: Forest
     text: "The rain on the leaves is its own kind of music.$h"
 
-  # 2. Custom token: callback after the player has chopped a tree today.
+  # =====================================================================
+  # AXIS: recent player action (custom token)
+  # =====================================================================
   - id: leah_chopped_tree_callback
     when:
       "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
     text: "I heard you out there with the axe today. Did the wood split clean?"
 
-  # 3. Time bucket + location: late evening in her cabin.
+  # =====================================================================
+  # AXIS: time-of-day × location
+  # =====================================================================
   - id: leah_late_evening_studio
     when:
       "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
       LocationName: LeahHouse
     text: "Mmm... I work better when the world's gone quiet. The shapes come easier."
 
-  # 4. Season + time bucket combo: winter morning at her cabin.
+  # =====================================================================
+  # AXIS: season × time-of-day × location
+  # =====================================================================
   - id: leah_winter_morning_warmth
     when:
       Season: Winter
       "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
       LocationName: LeahHouse
     text: "Mmm — the cabin's warmer than I thought it'd be this morning."
+
+  # =====================================================================
+  # AXIS: season (8 lines, 2 per season, distributed across weekdays)
+  # =====================================================================
+
+  # ---- Spring (no vanilla spring_<weekday> keys → use plain weekdays) ----
+  - id: leah_season_spring_pine
+    target_key: [Mon, Wed, Fri]
+    when:
+      Season: Spring
+    text: "Mmm — smells like wet wood and pine sap. The forest's waking up.$h"
+
+  - id: leah_season_spring_forage
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      Season: Spring
+    text: "I came home covered in mud. Worth it — the spring foraging is wild this year."
+
+  # ---- Summer (target summer_<weekday>; key implies season) ----
+  - id: leah_season_summer_herbs
+    target_key: [summer_Mon, summer_Wed, summer_Fri]
+    text: "It's almost too warm to work. I've been hauling water and hanging herbs to dry instead."
+
+  - id: leah_season_summer_thyme
+    target_key: [summer_Tue, summer_Thu, summer_Sat, summer_Sun]
+    text: "Mmm — found a whole patch of wild thyme this morning. Going to make pasta with it tonight.$h"
+
+  # ---- Fall (target fall_<weekday>; covers fall_Thu which vanilla lacks) ----
+  - id: leah_season_fall_light
+    target_key: [fall_Mon, fall_Wed, fall_Fri]
+    text: "The light's so different now. I keep wanting to capture how the leaves turn translucent at sunset."
+
+  - id: leah_season_fall_mushrooms
+    target_key: [fall_Tue, fall_Thu, fall_Sat, fall_Sun]
+    text: "Mushrooms everywhere right now. I've been adding them to almost everything I cook."
+
+  # ---- Winter (target winter_<weekday>) ----
+  - id: leah_season_winter_slow
+    target_key: [winter_Mon, winter_Wed, winter_Fri]
+    text: "I love how slow winter goes. Time stretches when you can't rush anywhere outside.$h"
+
+  - id: leah_season_winter_carve
+    target_key: [winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    text: "There's something about the way snow rests on bare wood. Makes me want to carve simpler shapes."
