@@ -1,9 +1,34 @@
 using System.Text;
 using StardewModdingAPI;
 using StardewValley;
-using StardewValley.GameData.Characters;
 
 namespace ECI.TestHarness;
+
+// ---------- scenario-file schema ----------
+// JSON file is a flat list of scenario objects, e.g.
+//   [{"Name":"...", "Setup":{"Time":1900}, "Assert":{"Npc":"Linus", "TextContains":"sentinel"}}]
+
+public class Scenario
+{
+    public string Name { get; set; } = "";
+    public ScenarioSetup? Setup { get; set; }
+    public ScenarioAssert Assert { get; set; } = new();
+}
+
+public class ScenarioSetup
+{
+    public int? Time { get; set; }                 // 600..2600 (Stardew HHMM)
+    public string? Weather { get; set; }           // Sun | Rain | Storm | Snow | Wind
+    public Dictionary<string, int>? Hearts { get; set; }   // NPC -> hearts
+    public string? WarpPlayerTo { get; set; }      // location internal name
+}
+
+public class ScenarioAssert
+{
+    public string Npc { get; set; } = "";
+    public string? TextContains { get; set; }
+    public string? TextEquals { get; set; }
+}
 
 /// <summary>Diagnostic console commands for inspecting ECI dialogue
 /// patches at runtime. Three commands:
@@ -44,6 +69,21 @@ public class ModEntry : Mod
             "eci_state",
             "Print the current world / player context relevant to dialogue selection.",
             this.OnState);
+
+        helper.ConsoleCommands.Add(
+            "eci_settime",
+            "Set Game1.timeOfDay. Usage: eci_settime <HHMM>",
+            this.OnSetTime);
+
+        helper.ConsoleCommands.Add(
+            "eci_setfriendship",
+            "Set friendship hearts for an NPC. Usage: eci_setfriendship <NPC> <hearts>",
+            this.OnSetFriendship);
+
+        helper.ConsoleCommands.Add(
+            "eci_runfile",
+            "Run a JSON scenario file under Mods/ECI.TestHarness/. Usage: eci_runfile <relative_path>",
+            this.OnRunFile);
     }
 
     // ---------- eci_dump ----------
@@ -193,5 +233,164 @@ public class ModEntry : Mod
         }
 
         this.Monitor.Log(sb.ToString(), LogLevel.Info);
+    }
+
+    // ---------- eci_settime ----------
+
+    private void OnSetTime(string command, string[] args)
+    {
+        if (args.Length < 1 || !int.TryParse(args[0], out int t))
+        {
+            this.Monitor.Log("Usage: eci_settime <HHMM>  (e.g. eci_settime 1900)", LogLevel.Error);
+            return;
+        }
+        if (!Context.IsWorldReady)
+        {
+            this.Monitor.Log("World not ready.", LogLevel.Warn);
+            return;
+        }
+        Game1.timeOfDay = t;
+        this.Monitor.Log($"Set timeOfDay to {t}.", LogLevel.Info);
+    }
+
+    // ---------- eci_setfriendship ----------
+
+    private void OnSetFriendship(string command, string[] args)
+    {
+        if (args.Length < 2 || !int.TryParse(args[1], out int hearts))
+        {
+            this.Monitor.Log("Usage: eci_setfriendship <NPC> <hearts>", LogLevel.Error);
+            return;
+        }
+        if (!Context.IsWorldReady)
+        {
+            this.Monitor.Log("World not ready.", LogLevel.Warn);
+            return;
+        }
+        string npc = args[0];
+        if (!Game1.player.friendshipData.ContainsKey(npc))
+            Game1.player.friendshipData[npc] = new StardewValley.Friendship();
+        Game1.player.friendshipData[npc].Points = hearts * 250;
+        this.Monitor.Log($"Set {npc} friendship to {hearts} hearts ({hearts * 250} pts).", LogLevel.Info);
+    }
+
+    // ---------- eci_runfile ----------
+
+    private void OnRunFile(string command, string[] args)
+    {
+        if (args.Length < 1)
+        {
+            this.Monitor.Log("Usage: eci_runfile <relative_path>  (path is under Mods/ECI.TestHarness/)", LogLevel.Error);
+            return;
+        }
+        if (!Context.IsWorldReady)
+        {
+            this.Monitor.Log("World not ready (no save loaded).", LogLevel.Warn);
+            return;
+        }
+
+        List<Scenario>? scenarios;
+        try
+        {
+            scenarios = this.Helper.Data.ReadJsonFile<List<Scenario>>(args[0]);
+        }
+        catch (Exception ex)
+        {
+            this.Monitor.Log($"Failed to read scenarios file '{args[0]}': {ex.Message}", LogLevel.Error);
+            return;
+        }
+        if (scenarios == null || scenarios.Count == 0)
+        {
+            this.Monitor.Log($"No scenarios in '{args[0]}'.", LogLevel.Warn);
+            return;
+        }
+
+        int passed = 0;
+        int failed = 0;
+        foreach (var sc in scenarios)
+        {
+            try
+            {
+                ApplySetup(sc.Setup);
+                bool ok = AssertScenario(sc.Assert, out string detail);
+                if (ok)
+                {
+                    this.Monitor.Log($"✓ {sc.Name}", LogLevel.Info);
+                    passed++;
+                }
+                else
+                {
+                    this.Monitor.Log($"✗ {sc.Name} — {detail}", LogLevel.Error);
+                    failed++;
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Monitor.Log($"✗ {sc.Name} — exception: {ex.Message}", LogLevel.Error);
+                failed++;
+            }
+        }
+        this.Monitor.Log($"Summary: {passed}/{passed + failed} passed.", LogLevel.Info);
+    }
+
+    private void ApplySetup(ScenarioSetup? setup)
+    {
+        if (setup == null) return;
+        if (setup.Time.HasValue) Game1.timeOfDay = setup.Time.Value;
+        if (setup.Hearts != null)
+        {
+            foreach (var (npc, hearts) in setup.Hearts)
+            {
+                if (!Game1.player.friendshipData.ContainsKey(npc))
+                    Game1.player.friendshipData[npc] = new StardewValley.Friendship();
+                Game1.player.friendshipData[npc].Points = hearts * 250;
+            }
+        }
+        if (!string.IsNullOrEmpty(setup.WarpPlayerTo))
+        {
+            Game1.warpFarmer(setup.WarpPlayerTo, 0, 0, false);
+        }
+        // Weather changes mid-day are noisy; skipped for v1. Use vanilla
+        // `debug weather` / sleep cycle for weather scenarios.
+    }
+
+    private bool AssertScenario(ScenarioAssert a, out string detail)
+    {
+        detail = "";
+        if (string.IsNullOrEmpty(a.Npc))
+        {
+            detail = "scenario missing 'npc'";
+            return false;
+        }
+        NPC? npc = Game1.getCharacterFromName(a.Npc);
+        if (npc == null)
+        {
+            detail = $"NPC '{a.Npc}' not found";
+            return false;
+        }
+        if (npc.CurrentDialogue.Count == 0)
+        {
+            detail = $"{a.Npc}.CurrentDialogue is empty";
+            return false;
+        }
+        string actual = npc.CurrentDialogue.Peek().getCurrentDialogue() ?? "";
+        if (a.TextContains != null && !actual.Contains(a.TextContains))
+        {
+            detail = $"expected text containing {Quote(a.TextContains)}, got {Quote(actual)}";
+            return false;
+        }
+        if (a.TextEquals != null && actual.Trim() != a.TextEquals.Trim())
+        {
+            detail = $"expected text equals {Quote(a.TextEquals)}, got {Quote(actual)}";
+            return false;
+        }
+        return true;
+    }
+
+    private static string Quote(string s)
+    {
+        string trimmed = s.Replace("\n", " ").Replace("\r", "");
+        if (trimmed.Length > 80) trimmed = trimmed.Substring(0, 80) + "…";
+        return $"\"{trimmed}\"";
     }
 }

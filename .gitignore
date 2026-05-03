@@ -7,6 +7,9 @@ tools/_vendor/
 ECI.Content/include/
 ECI.Content/content.json
 
+# Generated test-harness scenarios (built from source/scenarios/*.yaml)
+ECI.TestHarness/scenarios/
+
 # .NET
 **/bin/
 **/obj/

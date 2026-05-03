@@ -1,0 +1,29 @@
+# Runtime smoke scenarios for the test harness.
+# Build:  python3 tools/build_scenarios.py
+# Run in-game:  eci_runfile scenarios/linus_smoke.json
+#
+# Each scenario applies a setup (optional), then asserts the top of
+# NPC.CurrentDialogue matches text_contains / text_equals.
+
+- name: Linus sentinel fires (assumes already met + Friday in-game)
+  setup:
+    hearts:
+      Linus: 1   # bypass first-meeting Introduction key
+  assert:
+    npc: Linus
+    text_contains: "[ECI sentinel]"
+
+- name: Linus says SOMETHING (sanity)
+  assert:
+    npc: Linus
+    text_contains: ""
+
+- name: Leah sentinel does not exist (we don't have unconditional Leah override)
+  setup:
+    hearts:
+      Leah: 1
+  assert:
+    npc: Leah
+    # We expect this to FAIL — Leah's CurrentDialogue should NOT contain '[ECI sentinel]'
+    # since linus.yaml has the sentinel, leah.yaml does not.
+    text_contains: "[ECI sentinel]"
