@@ -328,6 +328,34 @@ lines:
     text: "I heard you passed out somewhere recently. Take it easier — sleep is part of the work, too."
 
   # =====================================================================
+  # PILLAR 2 ONRAMP: branching dialogue + multi-axis affinity
+  # Stardew $q/$r syntax. Response IDs (leah_q_art_yes / _maybe / _no)
+  # are mapped to per-axis affinity deltas in ECI.Tokens/responses.json.
+  # When the player picks an answer, ECI.Tokens's UpdateTicked hook
+  # detects the new entry in dialogueQuestionsAnswered and applies the
+  # configured deltas to Leah's Trust/Respect/Romance axes.
+  # =====================================================================
+
+  # Smoke test: at LeahHouse, Leah asks the player about her current
+  # piece. Choices test all three sign cases (positive, neutral, negative).
+  - id: leah_q_art_branching
+    target_key: any_day
+    when:
+      LocationName: LeahHouse
+    text: "$q 1601 fallback#Want to see what I'm working on?#$r 1601 0 leah_q_art_yes#Yes, I'd love to.#$r 1601 0 leah_q_art_maybe#Maybe another time.#$r 1601 0 leah_q_art_no#Why? It's just rocks."
+
+  # Trust-gated follow-up: once Trust ≥ 5 (i.e., the player picked
+  # "Yes, I'd love to." at least once), this line takes over the
+  # LeahHouse slot — proving the affinity → CP-token → conditional-
+  # dialogue loop closes end-to-end.
+  - id: leah_high_trust_checkin
+    target_key: any_day
+    when:
+      LocationName: LeahHouse
+      "{{Query: {{eavalenzuela.ECI.Tokens/Affinity_Leah_Trust}} >= 5}}": "true"
+    text: "Hey — thanks for asking about my work the other day. It mattered.$h"
+
+  # =====================================================================
   # MULTI-AXIS overrides (more specific → must come AFTER 1-axis lines
   # to win in CP's load-order resolution).
   # =====================================================================
