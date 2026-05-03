@@ -1,0 +1,320 @@
+# Abigail dialogue — all axes.
+#
+# Voice (per tone guide):
+#   - Default: energetic, curious, asks questions back. Mean ~6.7 words.
+#   - !-rate 2.09, ?-rate 2.5 (highest of the four), ...-rate 3.94.
+#   - Tics: "Hmm...", "Ugh...", "Haha...", "Hey,", "Kind of",
+#     rhetorical defense ("...isn't it?"), "Let's...", "That'd be cool".
+#   - Specific names: Sam, Sebastian. Sword/cave/exploring/grave vocab.
+#   - Topics: adventure/exploring/mines, combat/swords, occult/grave,
+#     hair/aesthetic, Sam & Sebastian, video games, being-seen-as-adult.
+#   - Avoids: vulnerability direct, settling down, Pierre's store as
+#     positive, children/parenting, fear-naming, formal vocabulary.
+
+npc: Abigail
+
+lines:
+  # =====================================================================
+  # AXIS: season — 8 lines (2/season)
+  # =====================================================================
+
+  # ---- Spring (no vanilla spring_<weekday>) ----
+  - id: abigail_season_spring_adventure
+    target_key: [Mon, Wed, Fri]
+    when:
+      Season: Spring
+    text: "Spring! Time to go adventuring before mom finds chores. ...Ha. Joking. Mostly."
+
+  - id: abigail_season_spring_caves
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      Season: Spring
+    text: "Caves are drier in spring. I'm thinking of going farther down. Don't tell my dad."
+
+  # ---- Summer ----
+  - id: abigail_season_summer_nights
+    target_key: [summer_Mon, summer_Wed, summer_Fri]
+    text: "Summer nights are the best for sneaking out. ...Not that I do that. Anymore."
+
+  - id: abigail_season_summer_free
+    target_key: [summer_Tue, summer_Thu, summer_Sat, summer_Sun]
+    text: "I love summer because there's always something happening. Mom's always at SOMETHING. Free time!"
+
+  # ---- Fall (covers missing fall_Fri) ----
+  - id: abigail_season_fall_year
+    target_key: [fall_Mon, fall_Wed, fall_Fri]
+    text: "Another year almost over. Hmm. I wonder what this one was about, you know?"
+
+  - id: abigail_season_fall_spirits
+    target_key: [fall_Tue, fall_Thu, fall_Sat, fall_Sun]
+    text: "Spirit's Eve is coming. You're going to come, right? Don't tell me you scare easy. Haha..."
+
+  # ---- Winter ----
+  - id: abigail_season_winter_bored
+    target_key: [winter_Mon, winter_Wed, winter_Fri]
+    text: "Winter's so boring. Sam's always playing with Vincent. Sebastian's in his room. ...So I read."
+
+  - id: abigail_season_winter_track
+    target_key: [winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    text: "Snow trails! I want to go track something. Anything. Even a squirrel at this point."
+
+  # =====================================================================
+  # AXIS: weather — 5 lines
+  # =====================================================================
+
+  - id: abigail_weather_rain_books
+    target_key: any_day
+    when:
+      Weather: Rain
+    text: "Rain's great for getting books done. Don't tell anyone — that ruins my whole vibe."
+
+  - id: abigail_weather_storm_thunder
+    target_key: any_day
+    when:
+      Weather: Storm
+    text: "Whoa, hear that thunder? I love when the weather actually does something."
+
+  - id: abigail_weather_snow_track
+    target_key: [winter_Mon, winter_Tue, winter_Wed, winter_Thu, winter_Fri, winter_Sat, winter_Sun]
+    when:
+      Weather: Snow
+    text: "Fresh snow! Easier to track things. Don't ask what I'm tracking. Haha..."
+
+  - id: abigail_weather_wind_excuse
+    target_key: any_day
+    when:
+      Weather: Wind
+    text: "Wind's loud today. Hard to think. Or maybe that's an excuse."
+
+  - id: abigail_weather_greenrain_witchy
+    target_key: [Mon, Tue, Wed, Thu, Fri, Sat, Sun,
+                 summer_Mon, summer_Tue, summer_Wed, summer_Thu, summer_Fri, summer_Sat, summer_Sun]
+    when:
+      Weather: GreenRain
+    text: "Green rain. Ugh, it's witchy and weird and I love it actually."
+
+  # =====================================================================
+  # AXIS: time-of-day — 6 lines
+  # =====================================================================
+
+  - id: abigail_time_morning_notgreat
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "Hmm, mornings. I'm not bad at them but I'm not... great. You know?"
+
+  - id: abigail_time_morning_cereal
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "Already had cereal. What, what's that face? I'm not a kid. ...Okay maybe a little."
+
+  - id: abigail_time_midday_lying
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": midday
+    text: "Mom thinks I'm at the store. I'm not. Don't say anything. Haha..."
+
+  - id: abigail_time_evening_seb
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": evening
+    text: "Evening — best time of day. Sebastian and I might hang out later if I can find him."
+
+  - id: abigail_time_late_caves
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Late! Going down to the caves. Coming?"
+
+  - id: abigail_time_late_videogames
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Hmm, late. Sam and Sebastian and I were going to play video games but they bailed. Oh well."
+
+  # =====================================================================
+  # AXIS: day-of-week — 6 lines (skip Tue)
+  # =====================================================================
+
+  - id: abigail_dow_mon_productive
+    target_key: [Mon, summer_Mon, fall_Mon, winter_Mon]
+    text: "Mondays are when I pretend to do something productive. ...Sometimes I even succeed."
+
+  - id: abigail_dow_wed_dadhome
+    target_key: [Wed, summer_Wed, fall_Wed, winter_Wed]
+    text: "Wednesday. Dad's store is closed. He's home. I'm... not."
+
+  - id: abigail_dow_thu_band
+    target_key: [Thu, summer_Thu, fall_Thu, winter_Thu]
+    text: "Sam wants to practice the band today. I keep telling him I'm not really IN the band."
+
+  - id: abigail_dow_fri_seb
+    target_key: [Fri, summer_Fri, fall_Fri, winter_Fri]
+    text: "Friday! Almost weekend. Maybe Sebastian'll actually leave his room. ...Maybe I'm hopeful, who knows."
+
+  - id: abigail_dow_sat_market
+    target_key: [Sat, summer_Sat, fall_Sat, winter_Sat]
+    text: "Market day. Mom drags me along. ...You know what's nice though? Free samples."
+
+  - id: abigail_dow_sun_dinner
+    target_key: [Sun, summer_Sun, fall_Sun, winter_Sun]
+    text: "Sundays we have family dinner. ...It's actually fine. Don't tell Mom I said that."
+
+  # =====================================================================
+  # AXIS: location — 8 lines
+  # =====================================================================
+
+  - id: abigail_loc_seedshop_home
+    target_key: any_day
+    when:
+      LocationName: SeedShop
+    text: "Yeah, this is where I live. Don't make a thing of it. ...Hi."
+
+  - id: abigail_loc_town_grave
+    target_key: any_day
+    when:
+      LocationName: Town
+    text: "I like the cemetery. The energy's interesting. ...Don't make that face."
+
+  - id: abigail_loc_forest_walk
+    target_key: any_day
+    when:
+      LocationName: Forest
+    text: "Walking around. Sometimes I see things you wouldn't believe. ...Or maybe you would."
+
+  - id: abigail_loc_mountain_seb
+    target_key: any_day
+    when:
+      LocationName: Mountain
+    text: "Going to find Sebastian. Don't tell him I came up here. ...I'll pretend it was on the way."
+
+  - id: abigail_loc_saloon_pool
+    target_key: any_day
+    when:
+      LocationName: Saloon
+    text: "Sam dragged me to the saloon for pool. He's terrible. I'm worse. Ha."
+
+  - id: abigail_loc_busstop_waiting
+    target_key: any_day
+    when:
+      LocationName: BusStop
+    text: "Waiting for nothing in particular. ...Sometimes that's the point, you know?"
+
+  - id: abigail_loc_mine_finally
+    target_key: any_day
+    when:
+      LocationName: Mine
+    text: "Finally got my dad to let me come down here. Sort of. He doesn't know."
+
+  - id: abigail_loc_beach_shells
+    target_key: any_day
+    when:
+      LocationName: Beach
+    text: "I came for shells. ...Yes, like a kid. So what."
+
+  # =====================================================================
+  # AXIS: recent player action — 8 lines (5 flags)
+  # =====================================================================
+
+  - id: abigail_did_chopped_cool
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "You were chopping wood today? That's actually pretty cool. Don't get a big head."
+
+  - id: abigail_did_chopped_sword
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "Heard you were swinging an axe. You should try a sword next. I have one."
+
+  - id: abigail_did_fish_spooky
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "Fishing! What weird stuff did you catch? Anything haunted?"
+
+  - id: abigail_did_fish_dad
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "Did you catch anything good? My dad would buy it from you, probably. Bargain hard, though."
+
+  - id: abigail_did_gift_lucky
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
+    text: "You gave somebody a gift? Hmm. ...Lucky them."
+
+  - id: abigail_did_mine_excited
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": enteredMine
+    text: "You went down to the mines? Did you find anything? Can I come next time?"
+
+  - id: abigail_did_mine_jealous
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": enteredMine
+    text: "You're going to the mines without me? Lame."
+
+  - id: abigail_did_passedout_okay
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": passedOut
+    text: "I heard you passed out. Are you okay? ...Like, actually okay?"
+
+  # =====================================================================
+  # MULTI-AXIS overrides
+  # =====================================================================
+
+  - id: abigail_saloon_friday_pool
+    target_key: [Fri, summer_Fri, fall_Fri, winter_Fri]
+    when:
+      LocationName: Saloon
+    text: "Friday pool game. Sam has to play with both eyes open this time. Hmm."
+
+  - id: abigail_mountain_spring_seb
+    target_key: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+    when:
+      LocationName: Mountain
+      Season: Spring
+    text: "Came up to drag Sebastian outside. Spring sun's good for him. ...He won't admit it."
+
+  - id: abigail_busstop_late
+    target_key: any_day
+    when:
+      LocationName: BusStop
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Late at the bus stop. Yeah I know how this looks. I'm not running away. ...Today."
