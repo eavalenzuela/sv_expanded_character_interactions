@@ -95,3 +95,16 @@
     time_bucket: late
   expect_source: override
   expect_log_name: leah_late_evening_studio/Mon
+
+- name: First encounter plays Introduction, NOT our weekday override
+  npc: Linus
+  context:
+    season: spring
+    day: 5
+    weekday: Fri
+    location: Mountain
+    weather: Sun
+    hearts: 0
+    is_met: false
+  expect_source: vanilla
+  expect_key: Introduction

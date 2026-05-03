@@ -59,6 +59,7 @@ class Context:
     location: str = "Town"          # internal map name (Mountain, Forest, LeahHouse, ...)
     hearts: int = 0                 # 0..14
     is_outdoors: bool = True
+    is_met: bool = True             # False = first encounter; Stardew plays Introduction
     has_seen_events: list[int] = field(default_factory=list)
     has_flags: list[str] = field(default_factory=list)
     eci_player_did_today: list[str] = field(default_factory=list)
@@ -249,13 +250,26 @@ def predict(ctx: Context, vanilla: dict[str, str], overrides: list[Override]) ->
        2. The LAST one in load order wins (CP applies EditData patches in
           load order; later writes overwrite earlier ones).
        3. If no override matches, fall through to vanilla.
+
+    Special case: if the player has not yet met this NPC (`is_met=False`)
+    and an Introduction key exists, Stardew plays it instead of any
+    weekday/season/location key. Caught the hard way during MVP testing.
     """
-    # Build a key→[overrides] index for O(1) lookup, preserving load order.
     by_key: dict[str, list[Override]] = {}
     for o in overrides:
         by_key.setdefault(o.key, []).append(o)
 
     skipped: list[tuple[Override, ConditionResult]] = []
+
+    # Introduction takes precedence on first meeting.
+    if not ctx.is_met and "Introduction" in vanilla:
+        intro_overrides = by_key.get("Introduction", [])
+        for o in intro_overrides:
+            cr = evaluate_conditions(o.when, ctx)
+            if cr.matched:
+                return Pick("Introduction", o.text, "override", o.log_name, skipped)
+            skipped.append((o, cr))
+        return Pick("Introduction", vanilla["Introduction"], "vanilla", "", skipped)
 
     for key in candidate_keys(ctx):
         matching: list[Override] = []
@@ -266,7 +280,7 @@ def predict(ctx: Context, vanilla: dict[str, str], overrides: list[Override]) ->
             else:
                 skipped.append((o, cr))
         if matching:
-            winner = matching[-1]   # last-write-wins
+            winner = matching[-1]
             return Pick(key, winner.text, "override", winner.log_name, skipped)
         if key in vanilla:
             return Pick(key, vanilla[key], "vanilla", "", skipped)
@@ -312,6 +326,7 @@ def cli_single(args: argparse.Namespace) -> int:
         weather=args.weather,
         location=args.location,
         hearts=args.hearts,
+        is_met=not args.unmet,
         eci_time_of_day_bucket=args.time_bucket,
         eci_player_did_today=list(args.did or []),
     )
@@ -344,6 +359,7 @@ def cli_scenarios(path: Path) -> int:
             weather=ctx_args.get("weather", "Sun"),
             location=ctx_args.get("location", "Town"),
             hearts=ctx_args.get("hearts", 0),
+            is_met=ctx_args.get("is_met", True),
             eci_time_of_day_bucket=ctx_args.get("time_bucket", "morning"),
             eci_player_did_today=list(ctx_args.get("did", [])),
         )
@@ -448,6 +464,9 @@ def main() -> int:
                    choices=["morning", "midday", "evening", "late"])
     p.add_argument("--did", action="append",
                    help="A flag to add to ECI.PlayerDidToday (repeatable).")
+    p.add_argument("--unmet", action="store_true",
+                   help="Simulate first-encounter (NPC has not been met yet — "
+                        "Stardew plays Introduction first).")
     args = p.parse_args()
 
     if args.scenarios:
