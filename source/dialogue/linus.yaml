@@ -1,0 +1,23 @@
+# Smoke-test dialogue for Linus — replaces Robin (whose shopkeeper menu
+# pre-empts dialogue at the counter). Linus lives in a publicly-accessible
+# tent at the mountain and walks outdoor forage areas, so he's easy to
+# reach and his right-click goes straight to dialogue.
+
+npc: Linus
+
+lines:
+  # Always-true sentinel — confirms the pipeline overrides his dialogue at all.
+  - id: linus_eci_sentinel
+    text: "[ECI sentinel] If you see this, the ECI content pack is loading and overriding my dialogue. Try `patch summary` in the SMAPI console for details."
+
+  # Custom-token check — should appear if you've chopped a tree today.
+  - id: linus_chopped_callback
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "[ECI test] Hey, you've been swinging that axe today, huh?"
+
+  # Time-bucket check — should appear after 7 PM.
+  - id: linus_late_evening
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "[ECI test] You're up late, friend."

@@ -71,14 +71,11 @@ public class ModEntry : Mod
 
     // ---------- Token providers ----------
 
-    private IEnumerable<string>? GetPlayerDidToday()
+    private IEnumerable<string> GetPlayerDidToday()
     {
-        if (!Context.IsWorldReady)
-            return null;
-
-        // After SaveLoaded/DayStarted, snapshot is non-null. Defensive check
-        // in case of unusual lifecycle paths.
-        if (this.snapshot is null)
+        // Always return a non-null array. Returning null causes CP to mark
+        // the token as "not ready" and stop polling it until day-start.
+        if (!Context.IsWorldReady || this.snapshot is null)
             return Array.Empty<string>();
 
         var stats = Game1.player.stats;
