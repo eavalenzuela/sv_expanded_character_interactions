@@ -79,45 +79,30 @@ public class ModEntry : Mod
 
     // ---------- Token providers ----------
 
-    private int playerDidTodayCallCount;
+    /// <summary>Sentinel value always present in PlayerDidToday's value set.
+    /// CP's ModSimpleValueProvider marks a lambda-form token as "not ready"
+    /// when its values are empty (see CP source, Values.Any() check). With
+    /// an empty list, conditions like 'PlayerDidToday: choppedTree' would
+    /// be reported as 'tokens not ready' instead of legitimately
+    /// non-matching. We include this sentinel so the token is always ready;
+    /// authors should never reference it in When clauses.</summary>
+    private const string ReadinessSentinel = "_active";
 
     private IEnumerable<string> GetPlayerDidToday()
     {
-        this.playerDidTodayCallCount++;
-        var n = this.playerDidTodayCallCount;
+        var flags = new List<string> { ReadinessSentinel };
 
-        // Always return a non-null array. Returning null causes CP to mark
-        // the token as "not ready" and stop polling it until day-start.
         if (!Context.IsWorldReady || this.snapshot is null)
-        {
-            // Log only the first few "not ready" cases to avoid spam.
-            if (n <= 3)
-            {
-                this.Monitor.Log(
-                    $"GetPlayerDidToday call #{n}: returning empty " +
-                    $"(IsWorldReady={Context.IsWorldReady}, snapshotNull={this.snapshot is null})",
-                    LogLevel.Info);
-            }
-            return Array.Empty<string>();
-        }
+            return flags;
 
         var stats = Game1.player.stats;
         var snap = this.snapshot;
-        var flags = new List<string>();
 
         if (stats.GiftsGiven > snap.GiftsGiven) flags.Add("gaveGift");
         if (stats.FishCaught > snap.FishCaught) flags.Add("caughtFish");
         if (stats.StumpsChopped > snap.StumpsChopped) flags.Add("choppedTree");
         if (Game1.player.passedOut) flags.Add("passedOut");
         flags.AddRange(this.warpFlags);
-
-        if (n <= 3 || flags.Count > 0)
-        {
-            this.Monitor.Log(
-                $"GetPlayerDidToday call #{n}: returning [{string.Join(", ", flags)}] " +
-                $"(snapshot={snap}, currentStats=[Gifts={stats.GiftsGiven}, Fish={stats.FishCaught}, Stumps={stats.StumpsChopped}])",
-                LogLevel.Info);
-        }
 
         return flags;
     }
