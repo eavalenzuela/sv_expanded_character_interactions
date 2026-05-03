@@ -38,7 +38,9 @@ public class ModEntry : Mod
         cp.RegisterToken(this.ModManifest, "TimeOfDayBucket",
             () => new[] { GetTimeOfDayBucket() });
 
-        this.Monitor.Log("Registered Content Patcher tokens: PlayerDidToday, TimeOfDayBucket.", LogLevel.Trace);
+        this.Monitor.Log(
+            $"Registered Content Patcher tokens (CP API ready: {cp.IsConditionsApiReady}): PlayerDidToday, TimeOfDayBucket.",
+            LogLevel.Info);
     }
 
     // ---------- Per-day reset ----------
@@ -47,15 +49,21 @@ public class ModEntry : Mod
     {
         // If the player loads a save mid-day, DayStarted won't fire until
         // tomorrow. Capture a baseline now so PlayerDidToday is "ready"
-        // immediately instead of returning null.
+        // immediately instead of returning empty.
         this.snapshot = DayStartSnapshot.Capture();
         this.warpFlags.Clear();
+        this.Monitor.Log(
+            $"OnSaveLoaded: snapshot captured ({this.snapshot}).",
+            LogLevel.Info);
     }
 
     private void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
         this.snapshot = DayStartSnapshot.Capture();
         this.warpFlags.Clear();
+        this.Monitor.Log(
+            $"OnDayStarted: snapshot captured ({this.snapshot}).",
+            LogLevel.Info);
     }
 
     // ---------- Warp-driven flags ----------
@@ -71,12 +79,27 @@ public class ModEntry : Mod
 
     // ---------- Token providers ----------
 
+    private int playerDidTodayCallCount;
+
     private IEnumerable<string> GetPlayerDidToday()
     {
+        this.playerDidTodayCallCount++;
+        var n = this.playerDidTodayCallCount;
+
         // Always return a non-null array. Returning null causes CP to mark
         // the token as "not ready" and stop polling it until day-start.
         if (!Context.IsWorldReady || this.snapshot is null)
+        {
+            // Log only the first few "not ready" cases to avoid spam.
+            if (n <= 3)
+            {
+                this.Monitor.Log(
+                    $"GetPlayerDidToday call #{n}: returning empty " +
+                    $"(IsWorldReady={Context.IsWorldReady}, snapshotNull={this.snapshot is null})",
+                    LogLevel.Info);
+            }
             return Array.Empty<string>();
+        }
 
         var stats = Game1.player.stats;
         var snap = this.snapshot;
@@ -86,8 +109,15 @@ public class ModEntry : Mod
         if (stats.FishCaught > snap.FishCaught) flags.Add("caughtFish");
         if (stats.StumpsChopped > snap.StumpsChopped) flags.Add("choppedTree");
         if (Game1.player.passedOut) flags.Add("passedOut");
-
         flags.AddRange(this.warpFlags);
+
+        if (n <= 3 || flags.Count > 0)
+        {
+            this.Monitor.Log(
+                $"GetPlayerDidToday call #{n}: returning [{string.Join(", ", flags)}] " +
+                $"(snapshot={snap}, currentStats=[Gifts={stats.GiftsGiven}, Fish={stats.FishCaught}, Stumps={stats.StumpsChopped}])",
+                LogLevel.Info);
+        }
 
         return flags;
     }
