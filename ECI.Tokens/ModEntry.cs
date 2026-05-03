@@ -13,6 +13,7 @@ public class ModEntry : Mod
     public override void Entry(IModHelper helper)
     {
         helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+        helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
         helper.Events.GameLoop.DayStarted += this.OnDayStarted;
         helper.Events.Player.Warped += this.OnWarped;
     }
@@ -42,6 +43,15 @@ public class ModEntry : Mod
 
     // ---------- Per-day reset ----------
 
+    private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
+    {
+        // If the player loads a save mid-day, DayStarted won't fire until
+        // tomorrow. Capture a baseline now so PlayerDidToday is "ready"
+        // immediately instead of returning null.
+        this.snapshot = DayStartSnapshot.Capture();
+        this.warpFlags.Clear();
+    }
+
     private void OnDayStarted(object? sender, DayStartedEventArgs e)
     {
         this.snapshot = DayStartSnapshot.Capture();
@@ -63,8 +73,13 @@ public class ModEntry : Mod
 
     private IEnumerable<string>? GetPlayerDidToday()
     {
-        if (this.snapshot is null || !Context.IsWorldReady)
+        if (!Context.IsWorldReady)
             return null;
+
+        // After SaveLoaded/DayStarted, snapshot is non-null. Defensive check
+        // in case of unusual lifecycle paths.
+        if (this.snapshot is null)
+            return Array.Empty<string>();
 
         var stats = Game1.player.stats;
         var snap = this.snapshot;

@@ -64,7 +64,13 @@ def expand_target_keys(target_key: Any) -> list[str]:
 def build_npc_fragment(npc: str, lines: list[dict]) -> dict:
     """Returns the body of a CP secondary file. No `Format` field — that's
     only allowed on the root content.json; secondary (Include'd) files must
-    omit it."""
+    omit it.
+
+    Every patch with a `When` block gets `Update: OnLocationChange,OnTimeChange`
+    so CP re-evaluates conditions when the player moves or time advances.
+    Without this, location-/time-/custom-token-conditioned patches would only
+    re-check at day-start and effectively never fire mid-day.
+    """
     changes: list[dict] = []
     for line in lines:
         line_id = line["id"]
@@ -80,6 +86,7 @@ def build_npc_fragment(npc: str, lines: list[dict]) -> dict:
             }
             if when:
                 change["When"] = {str(k): str(v) for k, v in when.items()}
+                change["Update"] = "OnLocationChange,OnTimeChange"
             changes.append(change)
     return {"Changes": changes}
 
