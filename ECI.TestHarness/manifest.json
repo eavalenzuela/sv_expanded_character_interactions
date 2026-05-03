@@ -1,0 +1,10 @@
+{
+  "Name": "Expanded Character Interactions — Test Harness",
+  "Author": "eavalenzuela",
+  "Version": "0.0.1",
+  "Description": "Adds SMAPI console commands for diagnosing ECI dialogue patches at runtime: eci_dump, eci_npcdialogue, eci_state.",
+  "UniqueID": "eavalenzuela.ECI.TestHarness",
+  "EntryDll": "ECI.TestHarness.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": []
+}

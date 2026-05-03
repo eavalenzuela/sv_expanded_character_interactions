@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>ECI.TestHarness</RootNamespace>
+    <AssemblyName>ECI.TestHarness</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Version>0.0.1</Version>
+
+    <GamePath Condition="'$(GamePath)' == ''">/games/games/steam/steamapps/common/Stardew Valley</GamePath>
+
+    <EnableModDeploy>true</EnableModDeploy>
+    <ModFolderName>ECI.TestHarness</ModFolderName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.3.2" />
+  </ItemGroup>
+
+</Project>
