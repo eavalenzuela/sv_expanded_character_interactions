@@ -62,6 +62,9 @@ def expand_target_keys(target_key: Any) -> list[str]:
 # ---------- emit ----------
 
 def build_npc_fragment(npc: str, lines: list[dict]) -> dict:
+    """Returns the body of a CP secondary file. No `Format` field — that's
+    only allowed on the root content.json; secondary (Include'd) files must
+    omit it."""
     changes: list[dict] = []
     for line in lines:
         line_id = line["id"]
@@ -78,7 +81,7 @@ def build_npc_fragment(npc: str, lines: list[dict]) -> dict:
             if when:
                 change["When"] = {str(k): str(v) for k, v in when.items()}
             changes.append(change)
-    return {"Format": CP_FORMAT, "Changes": changes}
+    return {"Changes": changes}
 
 
 def build_root(fragment_paths: list[str]) -> dict:
