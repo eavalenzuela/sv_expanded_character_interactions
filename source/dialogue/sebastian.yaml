@@ -1,0 +1,319 @@
+# Sebastian dialogue — all axes.
+#
+# Voice (per tone guide):
+#   - Flat-affect, dry, low-energy. Mean ~6.6 words.
+#   - !-rate 0.35 (LOWEST of the four). ?-rate 2.48 (high but rhetorical).
+#   - Earnestness gated by "Don't make fun of me, but..." or
+#     "Maybe I'm weird, but..." — mandatory before tender content.
+#   - Tics: "Hey...", "Oh — hey.", "Probably.", "I dunno.",
+#     "Ridiculous.", "Great." (sarcastic), "*yawn*", "Hehe...".
+#   - Topics: city/leaving fantasy, programming/freelance, sci-fi reading,
+#     motorcycle, rain/cold/night, Sam, frogs, underdog framing,
+#     Spirit's Eve, anti-conformist commentary.
+#   - Avoids: gushing, exclamation chains, "totally", collaborative
+#     tag-questions, formal vocab, sensory verbs (Leah's lane), direct
+#     mentions of biological father, Demetrius, Maru, loneliness.
+
+npc: Sebastian
+
+lines:
+  # =====================================================================
+  # AXIS: season — 8 lines (2/season)
+  # =====================================================================
+
+  - id: sebastian_season_spring_pollen
+    target_key: [Mon, Wed, Fri]
+    when:
+      Season: Spring
+    text: "Spring. Pollen everywhere. ...I might just stay inside until summer."
+
+  - id: sebastian_season_spring_motorcycle
+    target_key: [Tue, Thu, Sat, Sun]
+    when:
+      Season: Spring
+    text: "Took the motorcycle out. The roads are dry enough now. ...Probably."
+
+  - id: sebastian_season_summer_heat
+    target_key: [summer_Mon, summer_Wed, summer_Fri]
+    text: "It's too bright out. I'm an indoor person. ...Maybe I should move further north."
+
+  - id: sebastian_season_summer_contracts
+    target_key: [summer_Tue, summer_Thu, summer_Sat, summer_Sun]
+    text: "Working late this summer. The city contracts pay better but the deadlines are tighter. *yawn*"
+
+  - id: sebastian_season_fall_correct
+    target_key: [fall_Mon, fall_Wed, fall_Fri]
+    text: "Fall's the only good season. The light is correct. ...Don't make fun of me, but I look forward to the gray days."
+
+  - id: sebastian_season_fall_spirits
+    target_key: [fall_Tue, fall_Thu, fall_Sat, fall_Sun]
+    text: "Spirit's Eve is coming up. It's probably my favorite festival. ...Probably."
+
+  - id: sebastian_season_winter_quiet
+    target_key: [winter_Mon, winter_Wed, winter_Fri]
+    text: "Winter's quiet. People stop dropping by because they don't want to walk through snow. ...I mean. Same."
+
+  - id: sebastian_season_winter_smaller
+    target_key: [winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    text: "Maybe I'm weird, but I like winter. The world gets smaller. Easier to think."
+
+  # =====================================================================
+  # AXIS: weather — 5 lines
+  # =====================================================================
+
+  - id: sebastian_weather_rain_signature
+    target_key: any_day
+    when:
+      Weather: Rain
+    text: "Mm. Rain. ...This is what I'm here for, today."
+
+  - id: sebastian_weather_storm_books
+    target_key: any_day
+    when:
+      Weather: Storm
+    text: "Thunderstorm. Hard to focus on code. ...Easy to focus on books."
+
+  - id: sebastian_weather_snow_silence
+    target_key: [winter_Mon, winter_Tue, winter_Wed, winter_Thu, winter_Fri, winter_Sat, winter_Sun]
+    when:
+      Weather: Snow
+    text: "Snow. Everything's quieter. ...I can hear myself think for once."
+
+  - id: sebastian_weather_wind_motorcycle
+    target_key: any_day
+    when:
+      Weather: Wind
+    text: "Wind today. Bad motorcycle weather. ...Probably."
+
+  - id: sebastian_weather_greenrain_fine
+    target_key: [Mon, Tue, Wed, Thu, Fri, Sat, Sun,
+                 summer_Mon, summer_Tue, summer_Wed, summer_Thu, summer_Fri, summer_Sat, summer_Sun]
+    when:
+      Weather: GreenRain
+    text: "Green rain. The town's freaked out. I'm... fine, actually. Maybe I'm weird."
+
+  # =====================================================================
+  # AXIS: time-of-day — 6 lines
+  # =====================================================================
+
+  - id: sebastian_time_morning_yawn
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "*yawn* ...You're up early. ...Or I'm up late. Same difference."
+
+  - id: sebastian_time_morning_first
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+    text: "Hey. Hadn't seen a person yet today. ...You count, I guess."
+
+  - id: sebastian_time_midday_break
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": midday
+    text: "Quick break. The code'll still be wrong when I get back."
+
+  - id: sebastian_time_evening_thinking
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": evening
+    text: "Evenings are when I think clearly. ...Most people would say that's backwards."
+
+  - id: sebastian_time_late_build
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "It's late and I'm still on this build. ...Probably going to be a long night."
+
+  - id: sebastian_time_late_book
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Mm. Late. New book. Probably reading until 4 again."
+
+  # =====================================================================
+  # AXIS: day-of-week — 6 lines (skip Tue)
+  # =====================================================================
+
+  - id: sebastian_dow_mon_apathy
+    target_key: [Mon, summer_Mon, fall_Mon, winter_Mon]
+    text: "Monday. The week starts whether I want it to. ...Apathy is a renewable resource."
+
+  - id: sebastian_dow_wed_basement
+    target_key: [Wed, summer_Wed, fall_Wed, winter_Wed]
+    text: "Hump day, supposedly. ...I dunno, every day feels mostly the same down here."
+
+  - id: sebastian_dow_thu_jam
+    target_key: [Thu, summer_Thu, fall_Thu, winter_Thu]
+    text: "Thursday. Sam's working a Joja shift today. We were going to jam later. ...Maybe tomorrow."
+
+  - id: sebastian_dow_fri_drag
+    target_key: [Fri, summer_Fri, fall_Fri, winter_Fri]
+    text: "Friday. Sam'll drag me to the saloon. ...Probably."
+
+  - id: sebastian_dow_sat_sleep
+    target_key: [Sat, summer_Sat, fall_Sat, winter_Sat]
+    text: "Saturday. I'm sleeping until at least one. Don't judge."
+
+  - id: sebastian_dow_sun_alone
+    target_key: [Sun, summer_Sun, fall_Sun, winter_Sun]
+    text: "Sunday. Most people are at the saloon. I'm here. ...That's on purpose."
+
+  # =====================================================================
+  # AXIS: location — 8 lines
+  # =====================================================================
+
+  - id: sebastian_loc_room
+    target_key: any_day
+    when:
+      LocationName: SebastianRoom
+    text: "You're in my room. ...Hi."
+
+  - id: sebastian_loc_mountain
+    target_key: any_day
+    when:
+      LocationName: Mountain
+    text: "Mom forced me out to get fresh air. ...Yeah. Here it is."
+
+  - id: sebastian_loc_saloon_pool
+    target_key: any_day
+    when:
+      LocationName: Saloon
+    text: "Sam's playing pool. I'm watching. ...This is what passes for going out."
+
+  - id: sebastian_loc_town_errand
+    target_key: any_day
+    when:
+      LocationName: Town
+    text: "Mom sent me down here for something. ...I forgot."
+
+  - id: sebastian_loc_forest_screen
+    target_key: any_day
+    when:
+      LocationName: Forest
+    text: "Walking. Believe it or not. ...Sometimes the screen's too bright."
+
+  - id: sebastian_loc_beach_overit
+    target_key: any_day
+    when:
+      LocationName: Beach
+    text: "I come here when I want it to be over. The day, I mean. ...Not, like, dramatically."
+
+  - id: sebastian_loc_busstop_daydream
+    target_key: any_day
+    when:
+      LocationName: BusStop
+    text: "Sometimes I just look at the bus schedule. ...You know. Daydream."
+
+  - id: sebastian_loc_bathhouse_pool
+    target_key: any_day
+    when:
+      LocationName: BathHouse_Pool
+    text: "Sam talked me into pool day again. I don't actually swim. ...I just sit."
+
+  # =====================================================================
+  # AXIS: recent player action — 8 lines (5 flags)
+  # =====================================================================
+
+  - id: sebastian_did_chopped_repetitive
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "You were swinging an axe today? ...Different kind of repetitive task than mine."
+
+  - id: sebastian_did_chopped_strong
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": choppedTree
+    text: "Been chopping wood, huh? You've got more upper body strength than me. ...Most people do."
+
+  - id: sebastian_did_fish_patient
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "You went fishing? Hmm. ...That requires more patience than I have, probably."
+
+  - id: sebastian_did_fish_sam
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": caughtFish
+    text: "Sam said you were down at the docks. ...He talks about everyone. Sorry."
+
+  - id: sebastian_did_gift_remembered
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
+    text: "Heard you gave somebody a gift. ...That's nice. Most people forget."
+
+  - id: sebastian_did_mine_brave
+    target_key: [Mon, Wed, Fri,
+                 summer_Mon, summer_Wed, summer_Fri,
+                 fall_Mon, fall_Wed, fall_Fri,
+                 winter_Mon, winter_Wed, winter_Fri]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": enteredMine
+    text: "You went down in the mines? ...Brave or stupid. Maybe both. ...In a good way, I mean."
+
+  - id: sebastian_did_mine_meaning
+    target_key: [Tue, Thu, Sat, Sun,
+                 summer_Tue, summer_Thu, summer_Sat, summer_Sun,
+                 fall_Tue, fall_Thu, fall_Sat, fall_Sun,
+                 winter_Tue, winter_Thu, winter_Sat, winter_Sun]
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": enteredMine
+    text: "Heard you went exploring underground. ...I keep meaning to. Never do."
+
+  - id: sebastian_did_passedout_worry
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": passedOut
+    text: "Heard you passed out. ...Don't make fun of me, but I worry about people who do that."
+
+  # =====================================================================
+  # MULTI-AXIS overrides
+  # =====================================================================
+
+  - id: sebastian_saloon_friday_pool
+    target_key: [Fri, summer_Fri, fall_Fri, winter_Fri]
+    when:
+      LocationName: Saloon
+    text: "Pool tournament tonight. Sam's going to lose. ...He'd be mad if I told him I think that."
+
+  - id: sebastian_mountain_rain
+    target_key: any_day
+    when:
+      LocationName: Mountain
+      Weather: Rain
+    text: "Rainy walk. Don't tell my mom I'm not wearing a raincoat. ...She'll hover for weeks."
+
+  - id: sebastian_room_late
+    target_key: any_day
+    when:
+      LocationName: SebastianRoom
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
+    text: "Hey. ...You came down at 1 AM? You're either a programmer or a degenerate. ...Welcome to either way."
