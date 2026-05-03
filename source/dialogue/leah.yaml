@@ -163,6 +163,37 @@ lines:
     text: "Mmm... late visit. I should head home soon — I varnished a piece today and the wood's probably still tacky."
 
   # =====================================================================
+  # AXIS: day-of-week — 1-axis baselines (6 lines, one per weekday except
+  # Tuesday). Placed after time so DOW shadows time on these weekdays;
+  # placed before location so location overrides win on shared contexts.
+  # Tuesday intentionally skipped so time-of-day lines still fire then.
+  # =====================================================================
+
+  - id: leah_dow_mon_start
+    target_key: [Mon, summer_Mon, fall_Mon, winter_Mon]
+    text: "Mondays. A new sketchbook page. Anything could happen, statistically."
+
+  - id: leah_dow_wed_midweek
+    target_key: [Wed, summer_Wed, fall_Wed, winter_Wed]
+    text: "Mid-week. The piece I was sure about on Monday is already wrong."
+
+  - id: leah_dow_thu_gallery
+    target_key: [Thu, summer_Thu, fall_Thu, winter_Thu]
+    text: "Thursdays I deliver to the gallery if I have anything ready. Not this week — I'm hoarding."
+
+  - id: leah_dow_fri_almost
+    target_key: [Fri, summer_Fri, fall_Fri, winter_Fri]
+    text: "Friday. I keep promising myself Saturdays off. I keep breaking it.$h"
+
+  - id: leah_dow_sat_market
+    target_key: [Sat, summer_Sat, fall_Sat, winter_Sat]
+    text: "Saturdays. I sold three pieces at last week's market — already trying not to ruin the streak."
+
+  - id: leah_dow_sun_quiet
+    target_key: [Sun, summer_Sun, fall_Sun, winter_Sun]
+    text: "Sundays in the cabin are the slowest pace I let myself work at."
+
+  # =====================================================================
   # AXIS: location — 1-axis baselines (8 lines, distributed)
   # =====================================================================
 
