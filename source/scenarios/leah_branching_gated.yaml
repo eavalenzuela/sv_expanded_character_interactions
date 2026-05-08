@@ -1,0 +1,22 @@
+# Pillar 2 validation, part 2: trust-gated line takes over once Trust ≥ 5.
+#
+# Run order (from the SMAPI console):
+#   1. eci_affinity set Leah Trust 5
+#   2. eci_runfile scenarios/leah_branching_gated.json
+#
+# If this fails after setting Trust=5, the likely cause is CP not
+# re-evaluating the When clause because affinity changed mid-frame
+# without an OnTokenChange trigger. Workaround: warp out (e.g. to
+# Forest) and back to LeahHouse before re-running, which fires
+# OnLocationChange. If the workaround makes it pass, build_cp.py
+# should add OnTokenChange to entries whose When references an
+# Affinity_* token.
+
+- name: "Leah at LeahHouse with Trust>=5 — top dialogue is the gated checkin"
+  setup:
+    hearts:
+      Leah: 2
+    warp_player_to: LeahHouse
+  assert:
+    npc: Leah
+    text_contains: "thanks for asking about my work"

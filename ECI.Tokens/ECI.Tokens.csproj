@@ -15,6 +15,11 @@
     <!-- Auto-deploy build output to the local install for dev iteration. -->
     <EnableModDeploy>true</EnableModDeploy>
     <ModFolderName>ECI.Tokens</ModFolderName>
+
+    <!-- Harmony postfix on Dialogue.chooseResponse. dialogueQuestionsAnswered
+         only stores the question id, so polling can't tell which option was
+         picked — the response identity only lives on Response.responseKey. -->
+    <EnableHarmony>true</EnableHarmony>
   </PropertyGroup>
 
   <ItemGroup>

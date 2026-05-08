@@ -1,3 +1,4 @@
+using HarmonyLib;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
@@ -7,29 +8,53 @@ namespace ECI.Tokens;
 
 public class ModEntry : Mod
 {
+    // Stardew's Dialogue.chooseResponse adds playerResponse.id (which is
+    // the *question* id, not the response id) to dialogueQuestionsAnswered.
+    // The response identity (e.g. "leah_q_art_yes") only lives on the
+    // Response argument as `responseKey`. So polling dialogueQuestionsAnswered
+    // can't tell which option was picked. The Harmony postfix below is the
+    // only reliable hook into the per-response selection event.
+    internal static ModEntry? Instance;
+
     private DayStartSnapshot? snapshot;
     private readonly HashSet<string> warpFlags = new();
 
     private Affinity affinity = new();
     private ResponsesConfig responses = new();
-    private readonly HashSet<string> seenDialogueAnswers = new();
 
     private static readonly string[] FocalNpcs = { "Leah", "Shane", "Abigail", "Sebastian" };
     private static readonly string[] AffinityAxes = { "Trust", "Respect", "Romance" };
 
     public override void Entry(IModHelper helper)
     {
+        Instance = this;
+
         helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
         helper.Events.GameLoop.SaveLoaded += this.OnSaveLoaded;
         helper.Events.GameLoop.Saving += this.OnSaving;
         helper.Events.GameLoop.DayStarted += this.OnDayStarted;
-        helper.Events.GameLoop.UpdateTicked += this.OnUpdateTicked;
         helper.Events.Player.Warped += this.OnWarped;
 
         helper.ConsoleCommands.Add(
             "eci_affinity",
             "Inspect or set affinity. Usage: eci_affinity show [<NPC>] | eci_affinity set <NPC> <axis> <value>",
             this.OnAffinityCommand);
+
+        var harmony = new Harmony(this.ModManifest.UniqueID);
+        harmony.Patch(
+            original: AccessTools.Method(typeof(Dialogue), nameof(Dialogue.chooseResponse)),
+            postfix: new HarmonyMethod(typeof(ModEntry), nameof(ChooseResponsePostfix)));
+    }
+
+    /// <summary>Harmony postfix on Dialogue.chooseResponse. Fires after
+    /// vanilla has applied friendship and added the question id to
+    /// dialogueQuestionsAnswered. We read the response's responseKey
+    /// (the unique id like "leah_q_art_yes") and apply our affinity
+    /// deltas. No-op if the key isn't in responses.json.</summary>
+    public static void ChooseResponsePostfix(Response response)
+    {
+        if (response?.responseKey == null) return;
+        Instance?.ApplyResponseDeltas(response.responseKey);
     }
 
     // ---------- Token registration ----------
@@ -67,7 +92,9 @@ public class ModEntry : Mod
             () => new[] { GetTimeOfDayBucket() });
 
         // Register affinity tokens — one per (NPC, axis) since the simple
-        // Func RegisterToken form doesn't support input arguments.
+        // Func RegisterToken form doesn't support input arguments. CP only
+        // accepts alphabetical token names (no underscores/digits), so the
+        // shape is Affinity<NPC><Axis> e.g. AffinityLeahTrust.
         foreach (string npc in FocalNpcs)
         {
             foreach (string axis in AffinityAxes)
@@ -75,14 +102,14 @@ public class ModEntry : Mod
                 string n = npc, a = axis; // capture
                 cp.RegisterToken(
                     this.ModManifest,
-                    $"Affinity_{n}_{a}",
+                    $"Affinity{n}{a}",
                     () => new[] { this.affinity.Get(n, a).ToString() });
             }
         }
 
         this.Monitor.Log(
             $"Registered CP tokens: PlayerDidToday, TimeOfDayBucket, " +
-            $"and {FocalNpcs.Length * AffinityAxes.Length} Affinity_<NPC>_<Axis> tokens.",
+            $"and {FocalNpcs.Length * AffinityAxes.Length} Affinity<NPC><Axis> tokens.",
             LogLevel.Info);
     }
 
@@ -95,16 +122,10 @@ public class ModEntry : Mod
 
         this.affinity = this.Helper.Data.ReadSaveData<Affinity>("eci_affinity") ?? new Affinity();
 
-        // Snapshot what's already in dialogueQuestionsAnswered so we don't
-        // re-apply deltas for answers from previous play sessions.
-        this.seenDialogueAnswers.Clear();
-        foreach (string ans in Game1.player.dialogueQuestionsAnswered)
-            this.seenDialogueAnswers.Add(ans);
-
         int totalEntries = this.affinity.Values.Sum(npc => npc.Value.Count);
         this.Monitor.Log(
             $"OnSaveLoaded: loaded affinity for {this.affinity.Values.Count} NPCs " +
-            $"({totalEntries} axis entries), seeded {this.seenDialogueAnswers.Count} prior answers.",
+            $"({totalEntries} axis entries).",
             LogLevel.Info);
     }
 
@@ -126,22 +147,6 @@ public class ModEntry : Mod
         if (!e.IsLocalPlayer || e.NewLocation is null) return;
         if (e.NewLocation is MineShaft)
             this.warpFlags.Add("enteredMine");
-    }
-
-    private void OnUpdateTicked(object? sender, UpdateTickedEventArgs e)
-    {
-        // Cheap poll: every 30 ticks (~half-second). Dialogue answers are
-        // recorded on dialogue close, which can't happen faster than that.
-        if (!Context.IsWorldReady || e.Ticks % 30 != 0) return;
-
-        var current = Game1.player.dialogueQuestionsAnswered;
-        if (current.Count == this.seenDialogueAnswers.Count) return;
-
-        foreach (string ans in current)
-        {
-            if (this.seenDialogueAnswers.Add(ans))
-                this.ApplyResponseDeltas(ans);
-        }
     }
 
     private void ApplyResponseDeltas(string responseId)

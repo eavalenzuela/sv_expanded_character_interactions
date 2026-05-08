@@ -346,17 +346,19 @@ lines:
       LocationName: LeahHouse
     question:
       id: 1601
-      fallback: fallback
       text: "Want to see what I'm working on?"
       responses:
         - id: leah_q_art_yes
           text: "Yes, I'd love to."
+          followup: "Come on then — it's just over here. Watch the chips on the floor."
           affinity:
             Leah: { Trust: 5, Romance: 2 }
         - id: leah_q_art_maybe
           text: "Maybe another time."
+          followup: "No worries. Whenever you're curious."
         - id: leah_q_art_no
           text: "Why? It's just rocks."
+          followup: "...right. Forget I asked.$s"
           affinity:
             Leah: { Trust: -10, Respect: -5 }
 

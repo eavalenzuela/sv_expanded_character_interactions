@@ -1,0 +1,16 @@
+# Pillar 2 validation, part 1: branching question prompt fires at LeahHouse.
+#
+# Run order (from the SMAPI console):
+#   1. eci_affinity set Leah Trust 0
+#   2. eci_runfile scenarios/leah_branching_question.json
+#
+# Expected: ✓ pass — top of Leah.CurrentDialogue is the art-question prompt.
+
+- name: "Leah at LeahHouse with Trust<5 — top dialogue is the art-question prompt"
+  setup:
+    hearts:
+      Leah: 2          # past Introduction; not gated by hearts
+    warp_player_to: LeahHouse
+  assert:
+    npc: Leah
+    text_contains: "Want to see what I'm working on"

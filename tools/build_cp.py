@@ -89,9 +89,14 @@ def build_branching_text(question: dict) -> str:
     """Generate Stardew $q/$r dialogue syntax from a YAML question block.
 
     Format: $q <qid> <fallback>#<question>#$r <qid> <fp> <rid>#<text>#...
+
+    Stardew's $q parser shows the dialogue at <fallback> if the player has
+    already answered <qid>. The literal string "null" is the documented
+    "no fallback — skip the lookup" sentinel; any other value must name an
+    existing key in the NPC's Dialogue dict or Stardew throws KeyNotFound.
     """
     qid = question["id"]
-    fallback = question.get("fallback", "fallback")
+    fallback = question.get("fallback") or "null"
     qtext = question["text"]
     parts = [f"$q {qid} {fallback}#{qtext}"]
     for r in question.get("responses", []):
@@ -142,11 +147,19 @@ def affinity_to_query_when(when: dict) -> dict:
                     f"Use one of: '>=N', '>N', '<=N', '<N', '=N', '!=N'."
                 )
             op, val = m.group(1), m.group(2)
-            if op == "=":
-                op = "=="
-            token_ref = f"{{{{{ECI_TOKEN_NAMESPACE}/Affinity_{npc}_{axis}}}}}"
-            query = f"{{{{Query: {token_ref} {op} {val}}}}}"
-            out[query] = "true"
+            # Author-friendly operators → CP Query operators.
+            # CP Query supports: >= <= > < = <>  (not == or !=).
+            if op == "==":
+                op = "="
+            elif op == "!=":
+                op = "<>"
+            # CP token names must be alphabetical-only — no underscores. The
+            # ECI.Tokens registration uses the same Affinity<NPC><Axis> form.
+            token_ref = f"{{{{{ECI_TOKEN_NAMESPACE}/Affinity{npc}{axis}}}}}"
+            # CP When-clause Query syntax is a literal key:
+            #   "Query: <expression>": "true"
+            # NOT wrapped in {{...}}. Inner token refs stay {{...}}.
+            out[f"Query: {token_ref} {op} {val}"] = "true"
     return out
 
 
@@ -166,6 +179,8 @@ def build_npc_fragment(
 
         # `text:` and `question:` are mutually exclusive. Question wins if
         # present (its expansion fills the dialogue text).
+        followup_entries: list[tuple[str, str]] = []  # (response_id, followup_text)
+
         if "question" in line:
             text = build_branching_text(line["question"])
             for rid, npc_axes in collect_response_deltas(line["question"]).items():
@@ -175,6 +190,13 @@ def build_npc_fragment(
                         f"Make response IDs globally unique."
                     )
                 response_registry[rid] = npc_axes
+            # Stardew's Dialogue.chooseResponse does a direct dict access on
+            # speaker.Dialogue[responseKey] for the post-selection follow-up.
+            # Without an entry, it throws KeyNotFoundException and the player's
+            # answer is never recorded in dialogueQuestionsAnswered (so our
+            # affinity poll never sees it). Emit one entry per response.
+            for r in line["question"].get("responses", []):
+                followup_entries.append((r["id"], r.get("followup", "...")))
         else:
             text = line["text"]
 
@@ -190,6 +212,17 @@ def build_npc_fragment(
                 change["When"] = {str(k): str(v) for k, v in when.items()}
                 change["Update"] = "OnLocationChange,OnTimeChange"
             changes.append(change)
+
+        # Follow-up dialogue entries are unconditional — they're only reached
+        # via Stardew's chooseResponse path, so leaving them in the dict at
+        # all times is safe and avoids load-order surprises.
+        for rid, followup_text in followup_entries:
+            changes.append({
+                "Action": "EditData",
+                "Target": f"Characters/Dialogue/{npc}",
+                "Entries": {rid: followup_text},
+                "LogName": f"{line_id}/followup/{rid}",
+            })
     return {"Changes": changes}
 
 
