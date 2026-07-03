@@ -171,6 +171,10 @@ lines:
   - id: shane_dow_sat_tunnelers
     target_key: [Sat]
     text: "Tunnelers game day. ...I'm trying not to drink before kickoff."
+    expect:
+      weekday: Sat
+      location: Backwoods
+      time_bucket: midday
 
   - id: shane_dow_sun_couch
     target_key: [Sun]
@@ -226,6 +230,8 @@ lines:
   - id: shane_loc_joja_shift
     target_key: JojaMart
     text: "Stocking shelves. ...If you're here for the pep rally, you missed it."
+    expect:
+      location: JojaMart
 
   # =====================================================================
   # AXIS: recent player action — 8 lines (5 flags)
@@ -267,6 +273,18 @@ lines:
       "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
     text: "Marnie said you gave somebody a gift today. ...She doesn't usually mention things. Means you did good."
 
+  # ---- visitedSaloon (1 line; warp-tracked flag) ----
+  - id: shane_did_saloon_saw
+    target_key: "*"
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": visitedSaloon
+    text: "Saw you at the saloon earlier. ...Didn't say hi. Sorry. It's not you."
+    expect:
+      weekday: Wed
+      location: Backwoods
+      time_bucket: midday
+      did: [visitedSaloon]
+
   - id: shane_did_mine_dust
     target_key: "*"
     when:
@@ -278,6 +296,11 @@ lines:
     when:
       "eavalenzuela.ECI.Tokens/PlayerDidToday": passedOut
     text: "Heard you passed out. ...Buh. Take it easier, okay? ...Please."
+    expect:
+      weekday: Mon
+      location: Backwoods
+      time_bucket: midday
+      did: [passedOut]
 
   # =====================================================================
   # MULTI-AXIS overrides (most specific — must come last)
@@ -289,6 +312,10 @@ lines:
       LocationName: Saloon
       "eavalenzuela.ECI.Tokens/TimeOfDayBucket": evening
     text: "Order of operations: beer, beer, eat the peanuts, beer.$h"
+    expect:
+      weekday: Mon
+      location: Saloon
+      time_bucket: evening
 
   - id: shane_saloon_late_should_go
     target_key: "*"
@@ -303,3 +330,62 @@ lines:
       LocationName: AnimalShop
       Weather: Rain
     text: "Buh... rain. Coop's leaking again. *sigh*"
+
+  # =====================================================================
+  # PILLAR 2: branching dialogue + multi-axis affinity (second NPC after
+  # Leah — proves the multi-NPC responses.json path end-to-end).
+  # Morning at Marnie's: Shane offers to introduce Charlie. The question
+  # is Trust-gated (<5) so it stops repeating once the player earns his
+  # trust; the >=5 line below then takes over the same slot. Placed
+  # after the multi-axis section, so the question outranks
+  # shane_marnies_rain_coop on rainy mornings — questions are rarer and
+  # higher-value than ambient flavor.
+  # =====================================================================
+
+  - id: shane_q_charlie_branching
+    target_key: "*"
+    when:
+      LocationName: AnimalShop
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+      affinity:
+        Shane:
+          Trust: "<5"
+    question:
+      id: 1602
+      text: "Charlie's out back. My chicken. ...You want to meet her?"
+      responses:
+        - id: shane_q_charlie_yes
+          text: "I'd love to meet Charlie."
+          followup: "Heh. Okay. Don't make it weird... she can tell.$h"
+          affinity:
+            Shane: { Trust: 5, Respect: 2 }
+        - id: shane_q_charlie_later
+          text: "Maybe later — I'm in a rush."
+          followup: "Yeah. Sure. ...She's not going anywhere."
+        - id: shane_q_charlie_no
+          text: "It's just a chicken, Shane."
+          followup: "...Forget it. Forget I said anything.$s"
+          affinity:
+            Shane: { Trust: -10, Respect: -5 }
+    expect:
+      weekday: Mon
+      location: AnimalShop
+      time_bucket: morning
+
+  # Trust-gated follow-up — takes over the AnimalShop-morning slot once
+  # Trust ≥ 5 (mirrors leah_high_trust_checkin).
+  - id: shane_high_trust_charlie
+    target_key: "*"
+    when:
+      LocationName: AnimalShop
+      "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
+      affinity:
+        Shane:
+          Trust: ">=5"
+    text: "Charlie's been better since you met her. ...I mean— she's a chicken. But still. Thanks.$h"
+    expect:
+      weekday: Mon
+      location: AnimalShop
+      time_bucket: morning
+      affinity:
+        Shane: { Trust: 5 }

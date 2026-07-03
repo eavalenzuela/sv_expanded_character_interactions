@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
 
     <!-- Local Stardew install. Override with /p:GamePath=... or the GamePath env var. -->
     <GamePath Condition="'$(GamePath)' == ''">/games/games/steam/steamapps/common/Stardew Valley</GamePath>

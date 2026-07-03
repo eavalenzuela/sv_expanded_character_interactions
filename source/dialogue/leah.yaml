@@ -131,6 +131,10 @@ lines:
     when:
       "eavalenzuela.ECI.Tokens/TimeOfDayBucket": morning
     text: "The first hour after waking is for thinking. Before words start being asked of me."
+    expect:
+      weekday: Tue
+      location: Backwoods
+      time_bucket: morning
 
   - id: leah_time_midday_lunch
     target_key: any_day
@@ -172,6 +176,10 @@ lines:
   - id: leah_dow_mon_start
     target_key: [Mon, summer_Mon, fall_Mon, winter_Mon]
     text: "Mondays. A new sketchbook page. Anything could happen, statistically."
+    expect:
+      weekday: Mon
+      location: Backwoods
+      time_bucket: midday
 
   - id: leah_dow_wed_midweek
     target_key: [Wed, summer_Wed, fall_Wed, winter_Wed]
@@ -215,6 +223,10 @@ lines:
     when:
       LocationName: Forest
     text: "This part of the forest holds the quiet better. I think the moss eats the sound."
+    expect:
+      weekday: Tue
+      location: Forest
+      time_bucket: evening
 
   # ---- LeahHouse (her cabin — 2 lines, day-split) ----
   - id: leah_loc_cabin_bread
@@ -247,6 +259,8 @@ lines:
   - id: leah_loc_beach_motion
     target_key: Beach
     text: "Mmm — I keep coming back to the way the sand sucks back when a wave pulls. Pure motion."
+    expect:
+      location: Beach
 
   - id: leah_loc_mountain_stone
     target_key: any_day
@@ -313,12 +327,29 @@ lines:
       "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
     text: "Heard you brought someone a gift today. Small things like that — they collect over time."
 
+  # ---- visitedBeach (1 line; warp-tracked flag) ----
+  - id: leah_did_beach_salt
+    target_key: any_day
+    when:
+      "eavalenzuela.ECI.Tokens/PlayerDidToday": visitedBeach
+    text: "You were down by the water today, weren't you? The salt hangs on people. It's a good smell."
+    expect:
+      weekday: Thu
+      location: Backwoods
+      time_bucket: midday
+      did: [visitedBeach]
+
   # ---- enteredMine (1 line) ----
   - id: leah_did_mine_dust
     target_key: any_day
     when:
       "eavalenzuela.ECI.Tokens/PlayerDidToday": enteredMine
     text: "You've got a different look about you today. The mines, maybe? They leave a kind of dust on people."
+    expect:
+      weekday: Wed
+      location: Backwoods
+      time_bucket: midday
+      did: [enteredMine]
 
   # ---- passedOut (1 line, last so it wins on rare multi-flag days) ----
   - id: leah_did_passedout_rest
@@ -361,6 +392,9 @@ lines:
           followup: "...right. Forget I asked.$s"
           affinity:
             Leah: { Trust: -10, Respect: -5 }
+    expect:
+      weekday: Wed
+      location: LeahHouse
 
   # Trust-gated follow-up: once Trust ≥ 5, this line takes over the
   # LeahHouse slot — proving the affinity → CP-token → conditional-
@@ -374,6 +408,11 @@ lines:
         Leah:
           Trust: ">=5"
     text: "Hey — thanks for asking about my work the other day. It mattered.$h"
+    expect:
+      weekday: Wed
+      location: LeahHouse
+      affinity:
+        Leah: { Trust: 5 }
 
   # =====================================================================
   # MULTI-AXIS overrides (more specific → must come AFTER 1-axis lines
@@ -387,6 +426,10 @@ lines:
       Weather: Rain
       LocationName: Forest
     text: "The rain on the leaves is its own kind of music.$h"
+    expect:
+      weekday: Mon
+      location: Forest
+      weather: Rain
 
   # time × location: late evening in her cabin.
   - id: leah_late_evening_studio
@@ -395,6 +438,10 @@ lines:
       "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
       LocationName: LeahHouse
     text: "Mmm... I work better when the world's gone quiet. The shapes come easier."
+    expect:
+      weekday: Mon
+      location: LeahHouse
+      time_bucket: late
 
   # season × time × location: winter morning at her cabin.
   - id: leah_winter_morning_warmth

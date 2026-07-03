@@ -1,0 +1,34 @@
+# Pillar 2, second NPC: Shane's Charlie question + trust-gated follow-up
+# at Marnie's (AnimalShop) in the morning.
+#
+# Build:  python3 tools/build_scenarios.py
+# Run in-game (from the SMAPI console):
+#   eci_runfile scenarios/shane_branching.json
+#
+# The time setup pins the morning bucket (< 1100) and affinity is applied
+# via the ECI.Tokens mod API before the warp, so the warp's
+# OnLocationChange update evaluates the new token values.
+
+- name: "Shane at AnimalShop, morning, Trust<5 — Charlie question fires"
+  setup:
+    time: 900
+    hearts:
+      Shane: 2         # past Introduction; not gated by hearts
+    affinity:
+      Shane: { Trust: 0 }
+    warp_player_to: AnimalShop
+  assert:
+    npc: Shane
+    text_contains: "You want to meet her"
+
+- name: "Shane at AnimalShop, morning, Trust>=5 — gated Charlie line takes over"
+  setup:
+    time: 900
+    hearts:
+      Shane: 2
+    affinity:
+      Shane: { Trust: 5 }
+    warp_player_to: AnimalShop
+  assert:
+    npc: Shane
+    text_contains: "Charlie's been better since you met her"

@@ -38,11 +38,13 @@ KEY_MAP_SETUP = {
     "weather": "Weather",
     "hearts": "Hearts",
     "warp_player_to": "WarpPlayerTo",
+    "affinity": "Affinity",       # NPC -> axis -> value (via ECI.Tokens API)
 }
 KEY_MAP_ASSERT = {
     "npc": "Npc",
     "text_contains": "TextContains",
     "text_equals": "TextEquals",
+    "text_not_contains": "TextNotContains",
 }
 
 

@@ -31,10 +31,16 @@ YAML schema additions for Pillar 2:
           affinity:
             Leah: { Trust: -10, Respect: -5 }
 
-Run: python3 tools/build_cp.py
+By default the emitted Entries reference {{i18n:...}} keys and the
+authored strings land in ECI.Content/i18n/default.json, making the pack
+translation-ready (question text, response labels, and followups are
+separate translation units). Pass --no-i18n to inline raw strings.
+
+Run: python3 tools/build_cp.py [--no-i18n]
 """
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
@@ -49,6 +55,7 @@ REPO = Path(__file__).resolve().parent.parent
 SOURCE = REPO / "source" / "dialogue"
 OUT = REPO / "ECI.Content"
 INCLUDE = OUT / "include"
+I18N_OUT = OUT / "i18n" / "default.json"
 RESPONSES_OUT = REPO / "ECI.Tokens" / "responses.json"
 
 WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -83,9 +90,39 @@ def expand_target_keys(target_key: Any) -> list[str]:
     raise ValueError(f"Bad target_key: {target_key!r}")
 
 
+# ---------- i18n extraction ----------
+
+class I18nMap:
+    """Collects authored strings under unique keys and hands back
+    {{i18n:key}} references. When disabled, hands back the raw text.
+
+    Key scheme (all globally unique — lint enforces uniqueness of line
+    ids and response ids):
+      <line_id>            plain line text
+      <line_id>.question   question prompt text
+      <rid>                response label
+      <rid>.followup       post-selection follow-up
+    """
+
+    def __init__(self, enabled: bool = True):
+        self.enabled = enabled
+        self.entries: dict[str, str] = {}
+
+    def add(self, key: str, text: str) -> str:
+        if not self.enabled:
+            return text
+        if key in self.entries and self.entries[key] != text:
+            raise ValueError(
+                f"i18n key collision: {key!r} maps to two different strings. "
+                f"Line ids and response ids must not collide."
+            )
+        self.entries[key] = text
+        return f"{{{{i18n:{key}}}}}"
+
+
 # ---------- branching dialogue ----------
 
-def build_branching_text(question: dict) -> str:
+def build_branching_text(question: dict, line_id: str, i18n: I18nMap) -> str:
     """Generate Stardew $q/$r dialogue syntax from a YAML question block.
 
     Format: $q <qid> <fallback>#<question>#$r <qid> <fp> <rid>#<text>#...
@@ -94,14 +131,18 @@ def build_branching_text(question: dict) -> str:
     already answered <qid>. The literal string "null" is the documented
     "no fallback — skip the lookup" sentinel; any other value must name an
     existing key in the NPC's Dialogue dict or Stardew throws KeyNotFound.
+
+    The question prompt and each response label become separate i18n
+    entries; only the $q/$r scaffolding stays inline (CP resolves the
+    {{i18n:...}} refs before Stardew parses the dialogue string).
     """
     qid = question["id"]
     fallback = question.get("fallback") or "null"
-    qtext = question["text"]
+    qtext = i18n.add(f"{line_id}.question", question["text"])
     parts = [f"$q {qid} {fallback}#{qtext}"]
     for r in question.get("responses", []):
         rid = r["id"]
-        rtext = r["text"]
+        rtext = i18n.add(rid, r["text"])
         # Vanilla friendship delta is separate from our affinity. Default 0.
         fp = r.get("friendship", 0)
         parts.append(f"$r {qid} {fp} {rid}#{rtext}")
@@ -169,6 +210,7 @@ def build_npc_fragment(
     npc: str,
     lines: list[dict],
     response_registry: dict[str, dict[str, dict[str, int]]],
+    i18n: I18nMap,
 ) -> dict:
     """Build a CP secondary file body for one NPC."""
     changes: list[dict] = []
@@ -182,7 +224,7 @@ def build_npc_fragment(
         followup_entries: list[tuple[str, str]] = []  # (response_id, followup_text)
 
         if "question" in line:
-            text = build_branching_text(line["question"])
+            text = build_branching_text(line["question"], line_id, i18n)
             for rid, npc_axes in collect_response_deltas(line["question"]).items():
                 if rid in response_registry and response_registry[rid] != npc_axes:
                     raise ValueError(
@@ -196,9 +238,11 @@ def build_npc_fragment(
             # answer is never recorded in dialogueQuestionsAnswered (so our
             # affinity poll never sees it). Emit one entry per response.
             for r in line["question"].get("responses", []):
-                followup_entries.append((r["id"], r.get("followup", "...")))
+                followup_text = r.get("followup", "...")
+                followup_entries.append(
+                    (r["id"], i18n.add(f"{r['id']}.followup", followup_text)))
         else:
-            text = line["text"]
+            text = i18n.add(line_id, line["text"])
 
         keys = expand_target_keys(line.get("target_key", "*"))
         for key in keys:
@@ -239,11 +283,18 @@ def build_root(fragment_paths: list[str]) -> dict:
 # ---------- main ----------
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Build CP fragments from dialogue YAML")
+    parser.add_argument(
+        "--no-i18n", action="store_true",
+        help="Inline raw strings instead of {{i18n:...}} refs + default.json")
+    args = parser.parse_args()
+
     if not SOURCE.exists():
         print(f"✗ {SOURCE} not found", file=sys.stderr)
         return 1
 
     INCLUDE.mkdir(parents=True, exist_ok=True)
+    I18N_OUT.parent.mkdir(parents=True, exist_ok=True)
     RESPONSES_OUT.parent.mkdir(parents=True, exist_ok=True)
 
     yaml_files = sorted(SOURCE.glob("*.yaml"))
@@ -267,12 +318,13 @@ def main() -> int:
     total_lines = 0
     total_changes = 0
     response_registry: dict[str, dict[str, dict[str, int]]] = {}
+    i18n = I18nMap(enabled=not args.no_i18n)
 
     for yaml_path in yaml_files:
         data = yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
         npc = data["npc"]
         lines = data["lines"]
-        fragment = build_npc_fragment(npc, lines, response_registry)
+        fragment = build_npc_fragment(npc, lines, response_registry, i18n)
         out_path = INCLUDE / f"{npc.lower()}.json"
         out_path.write_text(json.dumps(fragment, indent=2) + "\n", encoding="utf-8")
         rel = out_path.relative_to(OUT).as_posix()
@@ -284,6 +336,17 @@ def main() -> int:
     root = build_root(fragment_paths)
     (OUT / "content.json").write_text(json.dumps(root, indent=2) + "\n", encoding="utf-8")
 
+    # Emit i18n/default.json — the translation-unit source of truth. Kept
+    # sorted so diffs stay reviewable. (i18n/ is tracked in git, unlike the
+    # generated fragments, since it ships with the pack and is the file
+    # translators start from.)
+    if i18n.enabled:
+        I18N_OUT.write_text(
+            json.dumps(dict(sorted(i18n.entries.items())), indent=2,
+                       ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
     # Emit responses.json. The C# mod reads this from its mod folder; a
     # symlink in Mods/ECI.Tokens/ keeps it live across rebuilds.
     RESPONSES_OUT.write_text(
@@ -293,6 +356,8 @@ def main() -> int:
 
     print(f"✓ Built {total_lines} lines → {total_changes} CP changes across {len(fragment_paths)} fragment(s)")
     print(f"  Root: {OUT / 'content.json'}")
+    if i18n.enabled:
+        print(f"  i18n strings: {len(i18n.entries)} → {I18N_OUT}")
     print(f"  Branching responses: {len(response_registry)} → {RESPONSES_OUT}")
     return 0
 

@@ -90,6 +90,38 @@ ECI_TOKENS = {
     "eavalenzuela.ECI.Tokens/TimeOfDayBucket",
 }
 
+# Legal values for our custom tokens. A typo here (e.g. `chopedTree`)
+# builds fine and then silently never fires in-game, so it's an error.
+# Keep in sync with ECI.Tokens/ModEntry.cs (GetPlayerDidToday flags and
+# GetTimeOfDayBucket buckets).
+ECI_TOKEN_VALUES = {
+    "eavalenzuela.ECI.Tokens/PlayerDidToday": {
+        "gaveGift", "caughtFish", "choppedTree", "passedOut", "enteredMine",
+        "visitedBeach", "visitedTown", "visitedSaloon",
+    },
+    "eavalenzuela.ECI.Tokens/TimeOfDayBucket": {
+        "morning", "midday", "evening", "late",
+    },
+}
+
+TIME_BUCKETS = {"morning", "midday", "evening", "late"}
+SEASON_SET = {"spring", "summer", "fall", "winter"}
+
+# Schema for the optional `expect:` block consumed by
+# simulate_selection.py --check-yaml. key -> allowed type(s).
+EXPECT_SCHEMA: dict[str, type | tuple[type, ...]] = {
+    "season": str,
+    "day": int,
+    "weekday": str,
+    "weather": str,
+    "location": str,
+    "hearts": int,
+    "time_bucket": str,
+    "did": list,
+    "is_met": bool,
+    "affinity": dict,
+}
+
 # Tokens whose presence in a When block requires a non-default Update mode
 # (set automatically by build_cp.py, but linted in case authors override).
 LOCATION_TOKENS = {"LocationName", "LocationContext", "LocationOwnerId",
@@ -152,10 +184,43 @@ def baseline_keys_for(npc: str) -> set[str] | None:
     return keys
 
 
+_vanilla_qid_cache: set[int] | None = None
+
+_VANILLA_Q_RE = re.compile(r"\$q\s+(\d+)")
+
+
+def vanilla_question_ids() -> set[int]:
+    """Question ids used anywhere in the harvested vanilla dialogue.
+
+    dialogueQuestionsAnswered is global player state, so an authored
+    question id colliding with ANY vanilla `$q` id (not just the same
+    NPC's) makes Stardew treat the question as already answered.
+    Returns an empty set when nothing is harvested.
+    """
+    global _vanilla_qid_cache
+    if _vanilla_qid_cache is not None:
+        return _vanilla_qid_cache
+    ids: set[int] = set()
+    if BASELINE.exists():
+        for path in BASELINE.glob("*.json"):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            for text in data.values():
+                for m in _VANILLA_Q_RE.finditer(str(text)):
+                    ids.add(int(m.group(1)))
+    _vanilla_qid_cache = ids
+    return ids
+
+
 # ---------- line-level checks ----------
 
 def lint_line(line: Any, file: Path, npc: str, result: LintResult,
-              seen_ids: dict[str, Path]) -> None:
+              seen_ids: dict[str, Path],
+              seen_qids: dict[int, tuple[Path, str]],
+              seen_rids: dict[str, tuple[Path, str]],
+              authored_keys: set[str]) -> None:
     if not isinstance(line, dict):
         result.add("error", file, None, f"line is not a mapping: {line!r}")
         return
@@ -183,10 +248,42 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
 
     if has_question:
         q = line["question"]
-        if not isinstance(q.get("id"), int):
+        qid = q.get("id")
+        if not isinstance(qid, int):
             result.add("error", file, line_id, "question.id must be an integer")
+        else:
+            if qid in seen_qids:
+                prev_file, prev_line = seen_qids[qid]
+                result.add("error", file, line_id,
+                           f"duplicate question.id {qid} (also used by "
+                           f"{prev_line} in {prev_file.name}) — Stardew tracks "
+                           f"answered questions by this id globally")
+            else:
+                seen_qids[qid] = (file, line_id)
+            if qid in vanilla_question_ids():
+                result.add("warning", file, line_id,
+                           f"question.id {qid} collides with a vanilla $q id — "
+                           f"Stardew may treat it as already answered. Pick an "
+                           f"id outside the vanilla range (e.g. 1600+).")
         if not isinstance(q.get("text"), str) or not q["text"].strip():
             result.add("error", file, line_id, "question.text missing or empty")
+        # Fallback key: the literal "null" sentinel (also the default) or a
+        # dialogue key that will actually exist — Stardew does a direct
+        # speaker.Dialogue[fallback] lookup and throws KeyNotFound otherwise.
+        fallback = q.get("fallback")
+        if fallback is not None and fallback != "null":
+            if not isinstance(fallback, str) or not fallback.strip():
+                result.add("error", file, line_id,
+                           "question.fallback must be the string 'null' or a "
+                           "dialogue key")
+            else:
+                baseline = baseline_keys_for(npc) or set()
+                if fallback not in baseline and fallback not in authored_keys:
+                    result.add("error", file, line_id,
+                               f"question.fallback {fallback!r} is neither a "
+                               f"vanilla {npc} dialogue key nor authored in this "
+                               f"file — Stardew throws KeyNotFound on the second "
+                               f"talk. Use 'null' to skip the fallback lookup.")
         responses = q.get("responses")
         if not isinstance(responses, list) or len(responses) < 2:
             result.add("error", file, line_id,
@@ -196,10 +293,29 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
                 if not isinstance(r, dict):
                     result.add("error", file, line_id, f"response is not a mapping: {r!r}")
                     continue
-                if not isinstance(r.get("id"), str) or not r["id"].strip():
+                rid = r.get("id")
+                if not isinstance(rid, str) or not rid.strip():
                     result.add("error", file, line_id, "response.id missing or not a string")
+                elif rid in seen_rids:
+                    prev_file, prev_line = seen_rids[rid]
+                    result.add("error", file, line_id,
+                               f"duplicate response id {rid!r} (also used by "
+                               f"{prev_line} in {prev_file.name}) — response ids "
+                               f"must be globally unique")
+                else:
+                    seen_rids[rid] = (file, line_id)
                 if not isinstance(r.get("text"), str) or not r["text"].strip():
                     result.add("error", file, line_id, f"response {r.get('id')!r} text missing or empty")
+                if not isinstance(r.get("followup"), str) or not r["followup"].strip():
+                    result.add("warning", file, line_id,
+                               f"response {r.get('id')!r} has no 'followup' — "
+                               f"players will see the '...' placeholder after "
+                               f"picking it")
+                friendship = r.get("friendship")
+                if friendship is not None and not isinstance(friendship, int):
+                    result.add("error", file, line_id,
+                               f"response {r.get('id')!r} friendship must be int, "
+                               f"got {type(friendship).__name__}")
                 affinity = r.get("affinity")
                 if affinity is not None and not isinstance(affinity, dict):
                     result.add("error", file, line_id,
@@ -281,7 +397,20 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
                     result.add("error", file, line_id,
                                f"when.affinity.{npc_name} must be a mapping")
                     continue
+                # These names become part of the Affinity<NPC><Axis> CP
+                # token, and CP silently rejects token names containing
+                # anything but letters.
+                if not re.fullmatch(r"[A-Za-z]+", str(npc_name)):
+                    result.add(
+                        "error", file, line_id,
+                        f"when.affinity NPC name {npc_name!r} must be letters "
+                        f"only — it becomes part of a CP token name.")
                 for axis, expr in axes.items():
+                    if not re.fullmatch(r"[A-Za-z]+", str(axis)):
+                        result.add(
+                            "error", file, line_id,
+                            f"when.affinity axis {axis!r} must be letters only "
+                            f"— it becomes part of a CP token name.")
                     if not isinstance(expr, str) or not re.match(
                         r"^\s*(>=|<=|!=|==|=|>|<)\s*-?\d+\s*$", expr
                     ):
@@ -322,10 +451,94 @@ def lint_line(line: Any, file: Path, npc: str, result: LintResult,
                             f"unknown CP built-in token '{k}' — typo? "
                             f"If it's a custom mod token, namespace it as 'Author.Mod/Token'.")
 
+                # Token-VALUE check for our own tokens. CP treats a
+                # comma-separated value as any-of; validate each element.
+                if k in ECI_TOKEN_VALUES and isinstance(v, str):
+                    legal = ECI_TOKEN_VALUES[k]
+                    bad = [part for part in (p.strip() for p in v.split(","))
+                           if part and part not in legal]
+                    if bad:
+                        result.add(
+                            "error", file, line_id,
+                            f"unknown value(s) {bad} for token '{k}' — the line "
+                            f"would never fire. Legal values: {sorted(legal)}.")
+
+    # expect block (optional; consumed by simulate_selection.py --check-yaml)
+    expect = line.get("expect")
+    if expect is not None:
+        if not isinstance(expect, dict):
+            result.add("error", file, line_id, "'expect' must be a mapping")
+        else:
+            for k, v in expect.items():
+                if k not in EXPECT_SCHEMA:
+                    result.add("error", file, line_id,
+                               f"unknown expect key {k!r} — allowed: "
+                               f"{sorted(EXPECT_SCHEMA)}")
+                    continue
+                if not isinstance(v, EXPECT_SCHEMA[k]):
+                    result.add("error", file, line_id,
+                               f"expect.{k} must be "
+                               f"{EXPECT_SCHEMA[k].__name__}, got "
+                               f"{type(v).__name__}")
+                    continue
+                if k == "season" and v not in SEASON_SET:
+                    result.add("error", file, line_id,
+                               f"expect.season {v!r} not in {sorted(SEASON_SET)}")
+                elif k == "weekday" and v not in WEEKDAYS:
+                    result.add("error", file, line_id,
+                               f"expect.weekday {v!r} not in {sorted(WEEKDAYS)}")
+                elif k == "time_bucket" and v not in TIME_BUCKETS:
+                    result.add("error", file, line_id,
+                               f"expect.time_bucket {v!r} not in {sorted(TIME_BUCKETS)}")
+                elif k == "did":
+                    legal = ECI_TOKEN_VALUES["eavalenzuela.ECI.Tokens/PlayerDidToday"]
+                    bad = [f for f in v if f not in legal]
+                    if bad:
+                        result.add("error", file, line_id,
+                                   f"expect.did has unknown flag(s) {bad} — "
+                                   f"legal: {sorted(legal)}")
+                elif k == "affinity":
+                    for npc_name, axes in v.items():
+                        if not isinstance(axes, dict) or not all(
+                            isinstance(val, int) for val in axes.values()
+                        ):
+                            result.add("error", file, line_id,
+                                       f"expect.affinity.{npc_name} must map "
+                                       f"axis → int")
+
 
 # ---------- file-level + cross-file checks ----------
 
-def lint_file(file: Path, result: LintResult, seen_ids: dict[str, Path]) -> None:
+def authored_keys_for(lines: list[Any]) -> set[str]:
+    """All dialogue-dict keys this file will emit: expanded target keys
+    plus response ids (each response gets a followup entry)."""
+    keys: set[str] = set()
+    for line in lines:
+        if not isinstance(line, dict):
+            continue
+        target = line.get("target_key", "*")
+        targets = [target] if isinstance(target, str) else (
+            list(target) if isinstance(target, list) else [])
+        for t in targets:
+            if t == "*":
+                keys.update(WEEKDAYS)
+            elif t == "any_day":
+                keys.update(WEEKDAYS)
+                for season in ("summer", "fall", "winter"):
+                    keys.update(f"{season}_{w}" for w in WEEKDAYS)
+            elif isinstance(t, str):
+                keys.add(t)
+        question = line.get("question")
+        if isinstance(question, dict):
+            for r in question.get("responses") or []:
+                if isinstance(r, dict) and isinstance(r.get("id"), str):
+                    keys.add(r["id"])
+    return keys
+
+
+def lint_file(file: Path, result: LintResult, seen_ids: dict[str, Path],
+              seen_qids: dict[int, tuple[Path, str]],
+              seen_rids: dict[str, tuple[Path, str]]) -> None:
     try:
         raw = file.read_text(encoding="utf-8")
         data = yaml.safe_load(raw)
@@ -353,15 +566,19 @@ def lint_file(file: Path, result: LintResult, seen_ids: dict[str, Path]) -> None
         result.add("error", file, None, "'lines' must be a list")
         return
 
+    authored_keys = authored_keys_for(lines)
     for line in lines:
-        lint_line(line, file, npc, result, seen_ids)
+        lint_line(line, file, npc, result, seen_ids, seen_qids, seen_rids,
+                  authored_keys)
 
 
 def lint_all(yaml_files: list[Path]) -> LintResult:
     result = LintResult()
     seen_ids: dict[str, Path] = {}
+    seen_qids: dict[int, tuple[Path, str]] = {}
+    seen_rids: dict[str, tuple[Path, str]] = {}
     for f in yaml_files:
-        lint_file(f, result, seen_ids)
+        lint_file(f, result, seen_ids, seen_qids, seen_rids)
     return result
 
 

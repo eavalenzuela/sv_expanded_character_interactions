@@ -1,7 +1,7 @@
 {
   "Name": "Expanded Character Interactions — Content",
   "Author": "eavalenzuela",
-  "Version": "0.0.1",
+  "Version": "0.0.2",
   "Description": "Adds context-aware dialogue variance for Shane, Leah, Abigail, and Sebastian.",
   "UniqueID": "eavalenzuela.ECI.Content",
   "ContentPackFor": {

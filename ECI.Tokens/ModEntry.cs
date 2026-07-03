@@ -37,7 +37,7 @@ public class ModEntry : Mod
 
         helper.ConsoleCommands.Add(
             "eci_affinity",
-            "Inspect or set affinity. Usage: eci_affinity show [<NPC>] | eci_affinity set <NPC> <axis> <value>",
+            "Inspect or modify affinity. Usage: eci_affinity show [<NPC>] | set <NPC> <axis> <value> | add <NPC> <axis> <delta> | reset [<NPC>]",
             this.OnAffinityCommand);
 
         var harmony = new Harmony(this.ModManifest.UniqueID);
@@ -45,6 +45,35 @@ public class ModEntry : Mod
             original: AccessTools.Method(typeof(Dialogue), nameof(Dialogue.chooseResponse)),
             postfix: new HarmonyMethod(typeof(ModEntry), nameof(ChooseResponsePostfix)));
     }
+
+    /// <summary>Mod-provided API (see EciApi). Lets other mods — notably
+    /// ECI.TestHarness scenario setup — read and set affinity without
+    /// going through the console.</summary>
+    public override object GetApi() => new EciApi(this);
+
+    // ---------- accessors used by EciApi ----------
+
+    internal Affinity AffinityStore => this.affinity;
+
+    internal static string[] GetFocalNpcs() => (string[])FocalNpcs.Clone();
+
+    internal static string[] GetAffinityAxes() => (string[])AffinityAxes.Clone();
+
+    internal string[] CurrentPlayerDidTodayFlags()
+        => this.GetPlayerDidToday().Where(f => f != ReadinessSentinel).ToArray();
+
+    /// <summary>Case-insensitively canonicalize an NPC name against the
+    /// focal list. `leah` → `Leah`, so callers can't create a shadow
+    /// lowercase bucket the Affinity&lt;NPC&gt;&lt;Axis&gt; tokens never
+    /// read. Unknown names pass through unchanged (axes are open-ended
+    /// by design).</summary>
+    internal static string CanonicalNpc(string npc)
+        => FocalNpcs.FirstOrDefault(n => n.Equals(npc, StringComparison.OrdinalIgnoreCase)) ?? npc;
+
+    /// <summary>Case-insensitively canonicalize an axis name (see
+    /// <see cref="CanonicalNpc"/>).</summary>
+    internal static string CanonicalAxis(string axis)
+        => AffinityAxes.FirstOrDefault(a => a.Equals(axis, StringComparison.OrdinalIgnoreCase)) ?? axis;
 
     /// <summary>Harmony postfix on Dialogue.chooseResponse. Fires after
     /// vanilla has applied friendship and added the question id to
@@ -147,6 +176,22 @@ public class ModEntry : Mod
         if (!e.IsLocalPlayer || e.NewLocation is null) return;
         if (e.NewLocation is MineShaft)
             this.warpFlags.Add("enteredMine");
+
+        // Location-visit flags. Cheap name compares; the set dedupes.
+        // Keep the flag list in sync with tools/lint_dialogue.py
+        // (ECI_TOKEN_VALUES) so authors get typo checking.
+        switch (e.NewLocation.Name)
+        {
+            case "Beach":
+                this.warpFlags.Add("visitedBeach");
+                break;
+            case "Town":
+                this.warpFlags.Add("visitedTown");
+                break;
+            case "Saloon":
+                this.warpFlags.Add("visitedSaloon");
+                break;
+        }
     }
 
     private void ApplyResponseDeltas(string responseId)
@@ -168,30 +213,83 @@ public class ModEntry : Mod
 
     // ---------- Console command ----------
 
+    private const string AffinityUsage =
+        "Usage:\n" +
+        "  eci_affinity show [<NPC>]\n" +
+        "  eci_affinity set <NPC> <axis> <value>\n" +
+        "  eci_affinity add <NPC> <axis> <delta>\n" +
+        "  eci_affinity reset [<NPC>]";
+
     private void OnAffinityCommand(string command, string[] args)
     {
         if (args.Length == 0)
         {
-            this.Monitor.Log(
-                "Usage:\n  eci_affinity show [<NPC>]\n  eci_affinity set <NPC> <axis> <value>",
-                LogLevel.Info);
+            this.Monitor.Log(AffinityUsage, LogLevel.Info);
             return;
         }
         switch (args[0].ToLowerInvariant())
         {
             case "show":
-                this.ShowAffinity(args.Length > 1 ? args[1] : null);
+                this.ShowAffinity(args.Length > 1 ? CanonicalNpc(args[1]) : null);
                 break;
             case "set" when args.Length >= 4 && int.TryParse(args[3], out int v):
-                this.affinity.Set(args[1], args[2], v);
-                this.Monitor.Log($"Set {args[1]}.{args[2]} = {v}.", LogLevel.Info);
+            {
+                var (npc, axis) = this.CanonicalizeAndWarn(args[1], args[2]);
+                this.affinity.Set(npc, axis, v);
+                this.Monitor.Log($"Set {npc}.{axis} = {this.affinity.Get(npc, axis)}.", LogLevel.Info);
                 break;
-            default:
+            }
+            case "add" when args.Length >= 4 && int.TryParse(args[3], out int d):
+            {
+                var (npc, axis) = this.CanonicalizeAndWarn(args[1], args[2]);
+                this.affinity.Adjust(npc, axis, d);
                 this.Monitor.Log(
-                    "Bad arguments. Usage: eci_affinity show [<NPC>] | eci_affinity set <NPC> <axis> <value>",
-                    LogLevel.Error);
+                    $"Adjusted {npc}.{axis} by {(d >= 0 ? "+" : "")}{d} → {this.affinity.Get(npc, axis)}.",
+                    LogLevel.Info);
+                break;
+            }
+            case "reset":
+            {
+                string? filter = args.Length > 1 ? CanonicalNpc(args[1]) : null;
+                if (filter is null)
+                {
+                    this.affinity.Values.Clear();
+                    this.Monitor.Log("Reset all affinity entries.", LogLevel.Info);
+                }
+                else if (this.affinity.Values.Remove(filter))
+                {
+                    this.Monitor.Log($"Reset affinity for {filter}.", LogLevel.Info);
+                }
+                else
+                {
+                    this.Monitor.Log($"(no affinity entries for {filter})", LogLevel.Info);
+                }
+                break;
+            }
+            default:
+                this.Monitor.Log($"Bad arguments.\n{AffinityUsage}", LogLevel.Error);
                 break;
         }
+    }
+
+    /// <summary>Canonicalize console-supplied NPC/axis casing and warn on
+    /// names outside the registered token set — a raw `leah`/`trust` entry
+    /// would silently never feed the AffinityLeahTrust CP token.</summary>
+    private (string Npc, string Axis) CanonicalizeAndWarn(string rawNpc, string rawAxis)
+    {
+        string npc = CanonicalNpc(rawNpc);
+        string axis = CanonicalAxis(rawAxis);
+        if (!FocalNpcs.Contains(npc))
+            this.Monitor.Log(
+                $"'{npc}' is not a focal NPC ({string.Join(", ", FocalNpcs)}) — " +
+                $"no Affinity CP token exposes this value.",
+                LogLevel.Warn);
+        if (!AffinityAxes.Contains(axis))
+            this.Monitor.Log(
+                $"'{axis}' is not a registered axis ({string.Join(", ", AffinityAxes)}) — " +
+                $"no Affinity CP token exposes this value.",
+                LogLevel.Warn);
+        return (npc, axis);
     }
 
     private void ShowAffinity(string? filterNpc)

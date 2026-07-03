@@ -60,6 +60,16 @@ CP doesn't support `>=` etc. as token comparisons directly. The canonical form i
 ### CP load-order resolution
 When multiple `EditData` patches target the same key in the same dictionary and all `When` clauses match, the **later patch in the file wins**. This is "last write wins" against the CP-built fragment, in textual order. Author your overrides accordingly: more-specific gates go after less-specific ones in the YAML/JSON.
 
+### Always-true axes shadow everything earlier on the same key
+A corollary of last-write-wins that cost us most of two authored axes: if a *set* of later patches jointly covers **every possible context** for a key, every earlier patch on that key is dead — not sometimes-shadowed, *never reachable*.
+
+Concretely: our time-of-day lines cover all four buckets (`morning|midday|evening|late`), and exactly one bucket is always active. Any patch set earlier in the file that targets the same weekday keys (our season and weather axes) can never win — some time-bucket line always matches and overwrites it. Same for day-of-week lines, which are unconditional on their weekday key: they kill everything earlier on that key, and only lose to later location/action/multi-axis lines.
+
+Notes:
+- This is invisible in `patch summary` (every patch "applied" — the value just got overwritten) and in lint (each line is individually valid).
+- `python3 tools/coverage_report.py` sweeps contexts through the selection simulator and lists dead lines per NPC. As of this writing it reports the season + weather axes (and a couple of others) as fully shadowed for the four focal NPCs — a content-design decision to resolve (rotate axes by day? gate the catch-all axes down?), not a build bug.
+- When adding a new axis, decide where it sits in the priority order *first*, then check whether it fully covers the axes below it.
+
 ---
 
 ## Stardew dialogue syntax

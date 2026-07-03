@@ -71,7 +71,10 @@
   expect_source: override
   expect_log_name: leah_forest_rain_listen/Mon
 
-- name: Leah at home on a Mon with no conditions matching → vanilla Mon
+# NOTE: an earlier version expected vanilla Mon here — that predated
+# leah_dow_mon_start (unconditional Mon) and leah_loc_town_pretty (Town),
+# which now make an override win on every Leah Monday.
+- name: Leah in Town on a Mon — town line wins over the Monday baseline
   npc: Leah
   context:
     season: spring
@@ -80,8 +83,9 @@
     location: Town
     weather: Sun
     hearts: 0
-  expect_source: vanilla
+  expect_source: override
   expect_key: Mon
+  expect_log_name: leah_loc_town_pretty/Mon
 
 - name: Leah late-evening studio fires at LeahHouse + late
   npc: Leah
@@ -95,6 +99,141 @@
     time_bucket: late
   expect_source: override
   expect_log_name: leah_late_evening_studio/Mon
+
+- name: Leah art question fires at LeahHouse while Trust < 5
+  npc: Leah
+  context:
+    season: spring
+    day: 3
+    weekday: Wed
+    location: LeahHouse
+    weather: Sun
+    hearts: 0
+  expect_source: override
+  expect_log_name: leah_q_art_branching/Wed
+  expect_text_contains: "Want to see what I'm working on"
+
+- name: Leah trust-gated checkin takes over LeahHouse once Trust >= 5
+  npc: Leah
+  context:
+    season: spring
+    day: 3
+    weekday: Wed
+    location: LeahHouse
+    weather: Sun
+    hearts: 0
+    affinity:
+      Leah: { Trust: 5 }
+  expect_source: override
+  expect_log_name: leah_high_trust_checkin/Wed
+
+- name: Shane JojaMart shift line wins on the vanilla location-key
+  npc: Shane
+  context:
+    season: spring
+    day: 2
+    weekday: Tue
+    location: JojaMart
+    weather: Sun
+    hearts: 0
+  expect_source: override
+  expect_key: JojaMart
+  expect_log_name: shane_loc_joja_shift/JojaMart
+
+- name: Shane saloon-evening multi-axis wins over the plain saloon line
+  npc: Shane
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: Saloon
+    weather: Sun
+    hearts: 0
+    time_bucket: evening
+  expect_source: override
+  expect_log_name: shane_saloon_evening_order/Mon
+
+- name: Shane Charlie question fires at Marnie's in the morning (Trust < 5)
+  npc: Shane
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: AnimalShop
+    weather: Sun
+    hearts: 0
+    time_bucket: morning
+  expect_source: override
+  expect_log_name: shane_q_charlie_branching/Mon
+  expect_text_contains: "You want to meet her"
+
+- name: Shane trust-gated Charlie line takes over once Trust >= 5
+  npc: Shane
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: AnimalShop
+    weather: Sun
+    hearts: 0
+    time_bucket: morning
+    affinity:
+      Shane: { Trust: 5 }
+  expect_source: override
+  expect_log_name: shane_high_trust_charlie/Mon
+
+- name: Abigail passed-out concern fires with did=passedOut
+  npc: Abigail
+  context:
+    season: spring
+    day: 2
+    weekday: Tue
+    location: Town
+    weather: Sun
+    hearts: 0
+    time_bucket: midday
+    did: [passedOut]
+  expect_source: override
+  expect_log_name: abigail_did_passedout_okay/Tue
+
+- name: Abigail bus-stop-late multi-axis wins over the plain bus-stop line
+  npc: Abigail
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: BusStop
+    weather: Sun
+    hearts: 0
+    time_bucket: late
+  expect_source: override
+  expect_log_name: abigail_busstop_late/Mon
+
+- name: Sebastian at 4 hearts on Mon — vanilla Mon4 beats our weekday override
+  npc: Sebastian
+  context:
+    season: spring
+    day: 1
+    weekday: Mon
+    location: Mountain
+    weather: Sun
+    hearts: 4
+    time_bucket: midday
+  expect_source: vanilla
+  expect_key: Mon4
+
+- name: Sebastian room-late multi-axis fires in his room at night
+  npc: Sebastian
+  context:
+    season: spring
+    day: 5
+    weekday: Fri
+    location: SebastianRoom
+    weather: Sun
+    hearts: 0
+    time_bucket: late
+  expect_source: override
+  expect_log_name: sebastian_room_late/Fri
 
 - name: First encounter plays Introduction, NOT our weekday override
   npc: Linus

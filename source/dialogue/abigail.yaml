@@ -164,6 +164,10 @@ lines:
   - id: abigail_dow_fri_seb
     target_key: [Fri, summer_Fri, fall_Fri, winter_Fri]
     text: "Friday! Almost weekend. Maybe Sebastian'll actually leave his room. ...Maybe I'm hopeful, who knows."
+    expect:
+      weekday: Fri
+      location: Backwoods
+      time_bucket: midday
 
   - id: abigail_dow_sat_market
     target_key: [Sat, summer_Sat, fall_Sat, winter_Sat]
@@ -218,6 +222,10 @@ lines:
     when:
       LocationName: Mine
     text: "Finally got my dad to let me come down here. Sort of. He doesn't know."
+    expect:
+      weekday: Mon
+      location: Mine
+      time_bucket: midday
 
   - id: abigail_loc_beach_shells
     target_key: any_day
@@ -270,6 +278,11 @@ lines:
     when:
       "eavalenzuela.ECI.Tokens/PlayerDidToday": gaveGift
     text: "You gave somebody a gift? Hmm. ...Lucky them."
+    expect:
+      weekday: Tue
+      location: Backwoods
+      time_bucket: midday
+      did: [gaveGift]
 
   - id: abigail_did_mine_excited
     target_key: [Mon, Wed, Fri,
@@ -318,3 +331,7 @@ lines:
       LocationName: BusStop
       "eavalenzuela.ECI.Tokens/TimeOfDayBucket": late
     text: "Late at the bus stop. Yeah I know how this looks. I'm not running away. ...Today."
+    expect:
+      weekday: Mon
+      location: BusStop
+      time_bucket: late

@@ -1,8 +1,8 @@
 {
   "Name": "Expanded Character Interactions — Tokens",
   "Author": "eavalenzuela",
-  "Version": "0.0.1",
-  "Description": "Registers Content Patcher tokens used by the ECI content pack (time-of-day buckets, NPC location, recent player actions).",
+  "Version": "0.0.2",
+  "Description": "Registers Content Patcher tokens used by the ECI content pack (time-of-day buckets, recent player actions, per-NPC affinity axes) and exposes a mod API for affinity access.",
   "UniqueID": "eavalenzuela.ECI.Tokens",
   "EntryDll": "ECI.Tokens.dll",
   "MinimumApiVersion": "4.0.0",

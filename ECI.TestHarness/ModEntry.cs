@@ -1,8 +1,22 @@
 using System.Text;
 using StardewModdingAPI;
+using StardewModdingAPI.Events;
 using StardewValley;
 
 namespace ECI.TestHarness;
+
+/// <summary>Subset of ECI.Tokens' mod-provided API (see
+/// ECI.Tokens/EciApi.cs). SMAPI/Pintail proxies by signature when we call
+/// <c>Helper.ModRegistry.GetApi&lt;IEciTokensApi&gt;("eavalenzuela.ECI.Tokens")</c>.</summary>
+public interface IEciTokensApi
+{
+    int GetAffinity(string npc, string axis);
+    void SetAffinity(string npc, string axis, int value);
+    void AdjustAffinity(string npc, string axis, int delta);
+    string[] GetTrackedNpcs();
+    string[] GetTrackedAxes();
+    string[] GetPlayerDidTodayFlags();
+}
 
 // ---------- scenario-file schema ----------
 // JSON file is a flat list of scenario objects, e.g.
@@ -21,6 +35,10 @@ public class ScenarioSetup
     public string? Weather { get; set; }           // Sun | Rain | Storm | Snow | Wind
     public Dictionary<string, int>? Hearts { get; set; }   // NPC -> hearts
     public string? WarpPlayerTo { get; set; }      // location internal name
+
+    // NPC -> axis -> value, applied via the ECI.Tokens mod API (skipped
+    // with a warning when ECI.Tokens isn't loaded).
+    public Dictionary<string, Dictionary<string, int>>? Affinity { get; set; }
 }
 
 public class ScenarioAssert
@@ -28,10 +46,11 @@ public class ScenarioAssert
     public string Npc { get; set; } = "";
     public string? TextContains { get; set; }
     public string? TextEquals { get; set; }
+    public string? TextNotContains { get; set; }   // negative assertion
 }
 
 /// <summary>Diagnostic console commands for inspecting ECI dialogue
-/// patches at runtime. Three commands:
+/// patches at runtime. The core inspectors:
 ///
 ///   eci_dump &lt;NPC&gt;
 ///       Loads Characters/Dialogue/&lt;NPC&gt; from the live content
@@ -47,14 +66,24 @@ public class ScenarioAssert
 ///
 ///   eci_state
 ///       Dumps the current world context: date, time, weather, player
-///       location, friendship hearts. Useful for confirming that
-///       `patch summary` and your test scenarios are running against
-///       the same conditions.
+///       location, friendship hearts, plus PlayerDidToday flags and
+///       affinity (via the ECI.Tokens API when loaded). Useful for
+///       confirming that `patch summary` and your test scenarios are
+///       running against the same conditions.
+///
+/// Plus setters (eci_settime, eci_setfriendship) and the scenario
+/// runner (eci_runfile), which supports Time/Hearts/Affinity/warp
+/// setup and TextContains/TextEquals/TextNotContains assertions.
 /// </summary>
 public class ModEntry : Mod
 {
+    private IEciTokensApi? eciApi;
+
     public override void Entry(IModHelper helper)
     {
+        // Mod APIs are only safe to fetch once every mod's Entry has run.
+        helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+
         helper.ConsoleCommands.Add(
             "eci_dump",
             "Print the live Characters/Dialogue/<NPC> dict (post-CP). Usage: eci_dump <NPC>",
@@ -84,6 +113,16 @@ public class ModEntry : Mod
             "eci_runfile",
             "Run a JSON scenario file under Mods/ECI.TestHarness/. Usage: eci_runfile <relative_path>",
             this.OnRunFile);
+    }
+
+    private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
+    {
+        this.eciApi = this.Helper.ModRegistry.GetApi<IEciTokensApi>("eavalenzuela.ECI.Tokens");
+        if (this.eciApi is null)
+            this.Monitor.Log(
+                "ECI.Tokens API not available — scenario affinity setup and " +
+                "eci_state affinity output are disabled.",
+                LogLevel.Warn);
     }
 
     // ---------- eci_dump ----------
@@ -232,6 +271,18 @@ public class ModEntry : Mod
             sb.AppendLine($"    {name,-16} {hearts} hearts ({friendship.Points} pts) status={friendship.Status}");
         }
 
+        if (this.eciApi is IEciTokensApi api)
+        {
+            sb.AppendLine($"  PlayerDidToday:  [{string.Join(", ", api.GetPlayerDidTodayFlags())}]");
+            sb.AppendLine($"  Affinity:");
+            string[] axes = api.GetTrackedAxes();
+            foreach (string npc in api.GetTrackedNpcs())
+            {
+                var values = axes.Select(a => $"{a}={api.GetAffinity(npc, a)}");
+                sb.AppendLine($"    {npc,-16} {string.Join("  ", values)}");
+            }
+        }
+
         this.Monitor.Log(sb.ToString(), LogLevel.Info);
     }
 
@@ -244,13 +295,25 @@ public class ModEntry : Mod
             this.Monitor.Log("Usage: eci_settime <HHMM>  (e.g. eci_settime 1900)", LogLevel.Error);
             return;
         }
+        // Stardew clock runs 600..2600 in HHMM with 10-minute ticks.
+        if (t < 600 || t > 2600 || t % 100 >= 60)
+        {
+            this.Monitor.Log(
+                $"'{t}' is not a valid Stardew time — expected HHMM between 600 and 2600 " +
+                $"with minutes < 60 (e.g. 630, 1250, 2410).",
+                LogLevel.Error);
+            return;
+        }
         if (!Context.IsWorldReady)
         {
             this.Monitor.Log("World not ready.", LogLevel.Warn);
             return;
         }
         Game1.timeOfDay = t;
-        this.Monitor.Log($"Set timeOfDay to {t}.", LogLevel.Info);
+        this.Monitor.Log(
+            $"Set timeOfDay to {t}. (CP patches gated on time re-apply on the next " +
+            $"context update — e.g. a location change or clock tick.)",
+            LogLevel.Info);
     }
 
     // ---------- eci_setfriendship ----------
@@ -260,6 +323,11 @@ public class ModEntry : Mod
         if (args.Length < 2 || !int.TryParse(args[1], out int hearts))
         {
             this.Monitor.Log("Usage: eci_setfriendship <NPC> <hearts>", LogLevel.Error);
+            return;
+        }
+        if (hearts < 0 || hearts > 14)
+        {
+            this.Monitor.Log($"'{hearts}' is out of range — hearts must be 0..14.", LogLevel.Error);
             return;
         }
         if (!Context.IsWorldReady)
@@ -346,6 +414,25 @@ public class ModEntry : Mod
                 Game1.player.friendshipData[npc].Points = hearts * 250;
             }
         }
+        if (setup.Affinity != null)
+        {
+            if (this.eciApi == null)
+            {
+                this.Monitor.Log(
+                    "Scenario has an Affinity setup but the ECI.Tokens API is " +
+                    "unavailable — skipping it (assertions may fail).",
+                    LogLevel.Warn);
+            }
+            else
+            {
+                foreach (var (npc, axes) in setup.Affinity)
+                    foreach (var (axis, value) in axes)
+                        this.eciApi.SetAffinity(npc, axis, value);
+            }
+        }
+        // Applied AFTER affinity so the warp's OnLocationChange context
+        // update sees the new token values (see modding guide: tokens
+        // re-evaluate on context updates, not on raw state changes).
         if (!string.IsNullOrEmpty(setup.WarpPlayerTo))
         {
             Game1.warpFarmer(setup.WarpPlayerTo, 0, 0, false);
@@ -382,6 +469,11 @@ public class ModEntry : Mod
         if (a.TextEquals != null && actual.Trim() != a.TextEquals.Trim())
         {
             detail = $"expected text equals {Quote(a.TextEquals)}, got {Quote(actual)}";
+            return false;
+        }
+        if (a.TextNotContains != null && actual.Contains(a.TextNotContains))
+        {
+            detail = $"expected text NOT containing {Quote(a.TextNotContains)}, got {Quote(actual)}";
             return false;
         }
         return true;

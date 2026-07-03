@@ -1,8 +1,10 @@
 # Pillar 2 validation, part 1: branching question prompt fires at LeahHouse.
 #
-# Run order (from the SMAPI console):
-#   1. eci_affinity set Leah Trust 0
-#   2. eci_runfile scenarios/leah_branching_question.json
+# Run (from the SMAPI console):
+#   eci_runfile scenarios/leah_branching_question.json
+#
+# The affinity setup pins Trust below the gate through the ECI.Tokens
+# mod API — no manual `eci_affinity set` step needed.
 #
 # Expected: ✓ pass — top of Leah.CurrentDialogue is the art-question prompt.
 
@@ -10,6 +12,8 @@
   setup:
     hearts:
       Leah: 2          # past Introduction; not gated by hearts
+    affinity:
+      Leah: { Trust: 0 }
     warp_player_to: LeahHouse
   assert:
     npc: Leah

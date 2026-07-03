@@ -3,7 +3,8 @@
 # Run in-game:  eci_runfile scenarios/linus_smoke.json
 #
 # Each scenario applies a setup (optional), then asserts the top of
-# NPC.CurrentDialogue matches text_contains / text_equals.
+# NPC.CurrentDialogue matches text_contains / text_equals /
+# text_not_contains.
 
 - name: Linus sentinel fires (assumes already met + Friday in-game)
   setup:
@@ -18,12 +19,14 @@
     npc: Linus
     text_contains: ""
 
-- name: Leah sentinel does not exist (we don't have unconditional Leah override)
+- name: Leah sentinel does not leak (no unconditional Leah override)
   setup:
     hearts:
       Leah: 1
   assert:
     npc: Leah
-    # We expect this to FAIL — Leah's CurrentDialogue should NOT contain '[ECI sentinel]'
-    # since linus.yaml has the sentinel, leah.yaml does not.
-    text_contains: "[ECI sentinel]"
+    # Negative assertion: the sentinel line lives in linus.yaml only, so
+    # Leah's dialogue must never contain it. (This used to be an
+    # intentional always-FAIL via text_contains before the harness had
+    # text_not_contains.)
+    text_not_contains: "[ECI sentinel]"

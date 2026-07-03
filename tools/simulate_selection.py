@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -44,6 +45,7 @@ import yaml
 REPO = Path(__file__).resolve().parent.parent
 BASELINE = REPO / "harvest" / "baseline_dialogue"
 INCLUDE = REPO / "ECI.Content" / "include"
+I18N_DEFAULT = REPO / "ECI.Content" / "i18n" / "default.json"
 SOURCE = REPO / "source" / "dialogue"
 
 
@@ -64,6 +66,7 @@ class Context:
     has_flags: list[str] = field(default_factory=list)
     eci_player_did_today: list[str] = field(default_factory=list)
     eci_time_of_day_bucket: str = "morning"  # morning | midday | evening | late
+    affinity: dict = field(default_factory=dict)  # {npc: {axis: int}}; missing = 0
 
     def heart_rung(self) -> int:
         """Returns the largest even heart-level <= hearts (0,2,4,6,8,10,12,14)."""
@@ -128,11 +131,33 @@ def parse_target(target: str) -> str | None:
     return None
 
 
+I18N_REF_RE = re.compile(r"\{\{i18n:([^}]+)\}\}")
+
+
+def load_i18n() -> dict[str, str]:
+    """Translation strings emitted by build_cp.py (empty if built --no-i18n)."""
+    if not I18N_DEFAULT.exists():
+        return {}
+    try:
+        data = json.loads(I18N_DEFAULT.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def resolve_i18n(text: str, i18n: dict[str, str]) -> str:
+    """Replace {{i18n:key}} refs the way CP would, so text assertions in
+    scenarios keep working against i18n-built fragments."""
+    return I18N_REF_RE.sub(
+        lambda m: i18n.get(m.group(1), m.group(0)), text)
+
+
 def load_overrides() -> dict[str, list[Override]]:
     """Returns {npc: [Override, ...]} parsed from the built CP fragments."""
     out: dict[str, list[Override]] = {}
     if not INCLUDE.exists():
         return out
+    i18n = load_i18n()
     for path in sorted(INCLUDE.glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
         for change in data.get("Changes", []):
@@ -148,7 +173,8 @@ def load_overrides() -> dict[str, list[Override]]:
             update = change.get("Update", "")
             for key, text in entries.items():
                 out.setdefault(npc, []).append(
-                    Override(npc, key, text, when, log_name, update)
+                    Override(npc, key, resolve_i18n(text, i18n), when,
+                             log_name, update)
                 )
     return out
 
@@ -206,6 +232,42 @@ class ConditionResult:
     unmodelable_tokens: list[str] = field(default_factory=list)
 
 
+# Affinity Query keys as emitted by build_cp.affinity_to_query_when:
+#   "Query: {{eavalenzuela.ECI.Tokens/Affinity<NPC><Axis>}} <op> <N>"
+# The NPC/axis names are concatenated without a separator, so we split on
+# the known axis suffixes (keep in sync with ECI.Tokens/ModEntry.cs).
+AFFINITY_AXES = ("Trust", "Respect", "Romance")
+AFFINITY_QUERY_RE = re.compile(
+    r"^Query:\s*\{\{eavalenzuela\.ECI\.Tokens/Affinity([A-Za-z]+?)"
+    r"(" + "|".join(AFFINITY_AXES) + r")\}\}\s*(>=|<=|<>|=|>|<)\s*(-?\d+)\s*$"
+)
+
+_QUERY_OPS = {
+    ">=": lambda a, b: a >= b,
+    "<=": lambda a, b: a <= b,
+    ">": lambda a, b: a > b,
+    "<": lambda a, b: a < b,
+    "=": lambda a, b: a == b,
+    "<>": lambda a, b: a != b,
+}
+
+
+def evaluate_affinity_query(token_name: str, expected: str,
+                            ctx: Context) -> bool | None:
+    """Evaluate a build_cp-emitted affinity Query key against ctx.affinity.
+    Returns True/False when modelable, None when this isn't an affinity
+    Query (caller treats it as unmodelable)."""
+    m = AFFINITY_QUERY_RE.match(token_name)
+    if not m:
+        return None
+    npc, axis, op, val = m.group(1), m.group(2), m.group(3), int(m.group(4))
+    actual = int(ctx.affinity.get(npc, {}).get(axis, 0))
+    result = _QUERY_OPS[op](actual, val)
+    # CP compares the Query result against the When value ("true"/"false").
+    expect_true = str(expected).strip().lower() != "false"
+    return result == expect_true
+
+
 def evaluate_conditions(when: dict[str, str], ctx: Context) -> ConditionResult:
     if not when:
         return ConditionResult(matched=True)
@@ -215,7 +277,11 @@ def evaluate_conditions(when: dict[str, str], ctx: Context) -> ConditionResult:
 
     for token_name, expected in when.items():
         if token_name not in KNOWN_TOKENS:
-            unmodelable.append(token_name)
+            affinity_match = evaluate_affinity_query(token_name, expected, ctx)
+            if affinity_match is None:
+                unmodelable.append(token_name)
+            elif not affinity_match:
+                failed.append(token_name)
             continue
         actual = token_value(token_name, ctx)
         # CP semantics: comma-separated value list = any-of
@@ -292,9 +358,11 @@ def predict(ctx: Context, vanilla: dict[str, str], overrides: list[Override]) ->
 
 def render_pick(ctx: Context, pick: Pick) -> str:
     out: list[str] = []
+    affinity_note = f" affinity={ctx.affinity}" if ctx.affinity else ""
     out.append(f"{ctx.npc} | {ctx.season} {ctx.day} ({ctx.weekday}) | "
                f"loc={ctx.location} weather={ctx.weather} hearts={ctx.hearts} "
-               f"timeBucket={ctx.eci_time_of_day_bucket} did={ctx.eci_player_did_today}")
+               f"timeBucket={ctx.eci_time_of_day_bucket} did={ctx.eci_player_did_today}"
+               f"{affinity_note}")
     if pick.key is None:
         out.append("  → no matching key (NPC silent)")
     else:
@@ -317,6 +385,19 @@ def render_pick(ctx: Context, pick: Pick) -> str:
 
 # ---------- CLI ----------
 
+def parse_affinity_args(pairs: list[str] | None) -> dict[str, dict[str, int]]:
+    """Parses repeatable --affinity args like 'Leah.Trust=5'."""
+    out: dict[str, dict[str, int]] = {}
+    for pair in pairs or []:
+        m = re.match(r"^(\w+)\.(\w+)=(-?\d+)$", pair)
+        if not m:
+            raise SystemExit(
+                f"✗ Bad --affinity {pair!r}; expected <NPC>.<Axis>=<int> "
+                f"(e.g. Leah.Trust=5)")
+        out.setdefault(m.group(1), {})[m.group(2)] = int(m.group(3))
+    return out
+
+
 def cli_single(args: argparse.Namespace) -> int:
     ctx = Context(
         npc=args.npc,
@@ -329,6 +410,7 @@ def cli_single(args: argparse.Namespace) -> int:
         is_met=not args.unmet,
         eci_time_of_day_bucket=args.time_bucket,
         eci_player_did_today=list(args.did or []),
+        affinity=parse_affinity_args(args.affinity),
     )
     vanilla = load_vanilla(args.npc)
     if not vanilla:
@@ -362,6 +444,7 @@ def cli_scenarios(path: Path) -> int:
             is_met=ctx_args.get("is_met", True),
             eci_time_of_day_bucket=ctx_args.get("time_bucket", "morning"),
             eci_player_did_today=list(ctx_args.get("did", [])),
+            affinity=dict(ctx_args.get("affinity", {})),
         )
         vanilla = load_vanilla(ctx.npc)
         overrides = overrides_by_npc.get(ctx.npc, [])
@@ -429,8 +512,10 @@ def cli_check_yaml() -> int:
                 weather=expect.get("weather", "Sun"),
                 location=expect.get("location", "Town"),
                 hearts=expect.get("hearts", 0),
+                is_met=expect.get("is_met", True),
                 eci_time_of_day_bucket=expect.get("time_bucket", "morning"),
                 eci_player_did_today=list(expect.get("did", [])),
+                affinity=dict(expect.get("affinity", {})),
             )
             checked += 1
             pick = predict(ctx, vanilla, overrides)
@@ -464,6 +549,9 @@ def main() -> int:
                    choices=["morning", "midday", "evening", "late"])
     p.add_argument("--did", action="append",
                    help="A flag to add to ECI.PlayerDidToday (repeatable).")
+    p.add_argument("--affinity", action="append",
+                   help="Affinity value as <NPC>.<Axis>=<int>, e.g. "
+                        "Leah.Trust=5 (repeatable).")
     p.add_argument("--unmet", action="store_true",
                    help="Simulate first-encounter (NPC has not been met yet — "
                         "Stardew plays Introduction first).")
